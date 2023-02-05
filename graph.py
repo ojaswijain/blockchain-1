@@ -21,7 +21,7 @@ def create_graph(node_list):
     """
     number_of_neighbours = {}
     edges = []
-    latency = []
+    latency = {}
     nodes = node_list
 
     #Generating random number of neighbours for each node
@@ -46,7 +46,7 @@ def create_graph(node_list):
             else:
                 speed = c_fast
             d = np.random.exponential(96e3/speed)
-            latency.append((p, speed, d))
+            latency[(n1.ID, n2.ID)] = (p, speed, d)
 
             #Removing nodes with no more neighbours
             number_of_neighbours[n1.ID] -= 1
@@ -56,8 +56,7 @@ def create_graph(node_list):
             if number_of_neighbours[n2.ID] == 0:
                 del nodes[n2.ID]
 
-
-    return Graph(node_list, edges, latency)
+    return Graph(node_list, latency)
 
 def isConnected(graph):
     """
@@ -86,3 +85,14 @@ def isConnected(graph):
         if i == False:
             return False
     return True
+
+def prop_delay(graph, node1, node2, msg):
+    """
+    Returns the time to propagate a message from node1 to node2
+    """
+    if node1.ID in node2.neighbours:
+        p, speed, d = graph.latency[(node1.ID, node2.ID)]
+        return p + (msg.size)/speed + d
+    else:
+        return 0
+    

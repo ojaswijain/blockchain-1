@@ -32,18 +32,3 @@ def create_genesis_block():
     Creates the genesis block
     """
     return Block(0, datetime.now(), "Genesis Block", "0")
-
-def hash_block(block):
-    """
-    Hashes a block
-    """
-    content = str(block.BlkID) + str(block.timestamp) + str(block.data) + str(block.previous_hash)
-    hash = sha256(content.encode('utf-8')).hexdigest()
-    return hash
-
-def next_block(last_block, data):
-    index = last_block.index + 1
-    timestamp = datetime.now()
-    data = data
-    hash = hash_block(last_block)
-    return Block(index, timestamp, data, hash)

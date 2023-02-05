@@ -8,10 +8,17 @@ Building a discrete event simulator for a P2P cryptocurrency network
 Handling transmission and reception of tranasctions
 """
 
-def transmit_transaction(transaction, node):
+from objects import Transaction, Block, Node
+
+def transmit_transaction(txn, node, time):
     """
     Transmits a transaction to a node
     """
+    for neighbour in node.neighbours:
+        if txn not in neighbour.txn_queue.keys():
+            neighbour.unused_txns.append(txn)
+
+
     pass
 
 def transmit_block(block, node):

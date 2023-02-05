@@ -28,7 +28,3 @@ def read_from_file(filename):
 def get_random_number():
     return np.random.randint(0, 100)
 
-"""
-
-"""
-
