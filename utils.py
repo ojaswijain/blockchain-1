@@ -5,12 +5,17 @@ Created on Sat Feb  4 12:03:13 2023
 @author: ojaswi
 
 Building a discrete event simulator for a P2P cryptocurrency network
+Utility functions
 """
 
 from datetime import datetime
 from hashlib import sha256
 import json
 import numpy as np
+
+"""
+Mechanical functions
+"""
 
 def write_to_file(filename, data):
     with open(filename, 'w') as f:
@@ -22,4 +27,8 @@ def read_from_file(filename):
 
 def get_random_number():
     return np.random.randint(0, 100)
+
+"""
+
+"""
 
