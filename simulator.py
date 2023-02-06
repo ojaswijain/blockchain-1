@@ -10,7 +10,7 @@ File for simulator class using simpy
 
 from time import time
 import numpy as np
-from init import gen_transaction, gen_block
+from init import gen_transaction, create_block
 
 
 class Simulator:
@@ -18,9 +18,6 @@ class Simulator:
     def __init__(self, node):
         self.node = node
         self.env.process(self.run())
-
-    def env(self):
-        return self.node.env
     
     def simulate(self):
         if (self.node.sim_time - self.node.last_txn_time) > np.random.exponential(self.node.tx_time)/1000:

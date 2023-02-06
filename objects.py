@@ -24,7 +24,7 @@ class Transaction:
     """
     def __init__(self, sender, receiver, amount):
         self.timestamp = time()
-        self.TxID = sha256(str(np.random.randint(1,1000))+(str(self.timestamp).encode('utf-8'))).hexdigest()
+        self.TxID = sha256(str((np.random.randint(1,1000))+str(self.timestamp)).encode('utf-8')).hexdigest()
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
@@ -49,7 +49,7 @@ class Block:
     reward = 50
     def __init__(self, data):
         self.timestamp = time()
-        self.BlkID = sha256(self.timestamp).encode('utf-8').hexdigest()
+        self.BlkID = sha256(str(self.timestamp).encode('utf-8')).hexdigest()
         self.data = data
         self.size = 8e3
         self.parent = None
@@ -100,7 +100,7 @@ class Node:
     unused_txns = list of unused transactions (list)
     env = environment (simpy)
     """
-    genesisBlock = Block([],None)
+    genesisBlock = Block([])
     genesisBlock.blkid = sha256(str(0).encode('utf-8')).hexdigest()
     chain = BlockChain(genesisBlock)
     init_time = time()

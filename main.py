@@ -31,6 +31,7 @@ env = simpy.Environment()
 sim_list = []
 
 for node in nodelist:
+    print(1)
     sim_list.append(Simulator(node))
 
 for sim in sim_list:
