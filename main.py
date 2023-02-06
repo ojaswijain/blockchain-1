@@ -19,7 +19,6 @@ n = 100
 z0 = 0.1
 z1 = 0.1
 
-
 nodelist = gen_nodes(n, z0, z1)
 create_graph(nodelist)
 
