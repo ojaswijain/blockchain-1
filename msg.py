@@ -9,8 +9,6 @@ Handling transmission and reception of tranasctions
 """
 
 from graph import prop_delay
-from init import create_block
-import numpy
 
 def broadcast_transaction(txn, node, time):
     """
@@ -29,26 +27,26 @@ def broadcast_block(block, node, time):
     """
     Broadcasts a block from a node
     """
+    print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
     node.block_queue[block.BlkID] = time
 
-    if(node.tk + node.Tk < time):
-        create_block(node)
-    
-    node.tk = time
-    node.Tk = numpy.random.exponential(600/node.CPU)
     for neighbour in node.neighbours:
         if block.BlkID not in neighbour.block_queue.keys():
-            time = time + prop_delay(node, neighbour, block)
+            delay = prop_delay(node, neighbour, block)
+            print("Delay: ", delay, " from node: ", node.ID, " to node: ", neighbour.ID)
+            time_new = time + delay
             neighbour.block_queue[block.BlkID] = time
             newledger = neighbour.ledger.copy()
             for txn in block.data:
-                newledger[txn.sender]-=txn.amount
+                # print("TxID: ", txn.TxID, " created by node: ", txn.sender, "to node: ", txn.receiver)
+                if txn.sender is not None:
+                    newledger[txn.sender]-=txn.amount
+                    if(newledger[txn.sender]<0):
+                        return
                 newledger[txn.receiver]+=txn.amount
-                if(newledger[txn.sender]<0):
-                    return
             neighbour.ledger = newledger
-            neighbour.update(block, time)
-            broadcast_block(block, neighbour, time)
+            neighbour.update(block, time_new)
+            broadcast_block(block, neighbour, time_new)
     return
 
 
