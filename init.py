@@ -38,3 +38,24 @@ def gen_transaction(sender):
     sender.unused_txns.append(txn)
     sender.last_txn_time = txn.timestamp
     broadcast_transaction(txn, sender, txn.timestamp)
+
+def create_block(node):
+    """
+    Creates a block
+    """
+    if len(node.unused_txns) == 0:
+        return
+    #Creating a block
+    block = Block(node)
+    block.timestamp = datetime.now()
+    block.parent = node.blockchain[-1].BlkID
+    #Adding transactions
+    for txn in node.unused_txns:
+        block.add_transaction(txn)
+    #Adding block to blockchain
+    node.blockchain.add_block(block)
+    #Removing transactions from unused_txns
+    node.unused_txns = []
+    #Broadcasting block
+    broadcast_block(block, node, block.timestamp)
+    node.balance += block.reward

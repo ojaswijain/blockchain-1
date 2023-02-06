@@ -8,7 +8,6 @@ Building a discrete event simulator for a P2P cryptocurrency network
 Handling transmission and reception of tranasctions
 """
 
-from objects import Transaction, Block, Node
 from graph import prop_delay
 
 def broadcast_transaction(txn, node, time):

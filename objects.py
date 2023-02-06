@@ -45,9 +45,10 @@ class Block:
     Block class
     BlkID = unique ID of the block (string)
     timestamp = timestamp of the block (datetime)
-    data = data of the block (string)
+    data = data of the block (list of transactions)
     size = size of the block (int (bits))
     """
+    reward = 50
     def __init__(self, data, miner):
         self.timestamp = datetime.now()
         self.BlkID = sha256(str(datetime.now()).encode('utf-8')).hexdigest()
@@ -120,7 +121,7 @@ class Node:
         self.graph = None
 
     def isFork(self, block, time):
-        if block.parent == self.localChain.get_block().parent and block.blkid != self.localChain.get_block().blkid:
+        if block.parent == self.localChain.get_block().parent and block.BlkID != self.localChain.get_block().BlkID:
             if time > self.last_block_time:
                 self.last_block_time = time
                 self.last_block = block
