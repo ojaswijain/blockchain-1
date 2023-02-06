@@ -46,6 +46,7 @@ def broadcast_block(block, node, time):
                 newledger[txn.receiver]+=txn.amount
                 if(newledger[txn.sender]<0):
                     return
+            node.ledger = newledger
             neighbour.update(block, time)
             broadcast_block(block, neighbour, time)
     return
