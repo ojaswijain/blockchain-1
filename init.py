@@ -51,7 +51,7 @@ def create_block(node):
     block.parent = node.last_block
     #Adding transactions
     for txn in node.unused_txns[:10]:
-        block.add_transaction(txn)
+        block.data.append(txn)
     #Adding block to blockchain
     node.update(block, block.timestamp)
     #Removing transactions from unused_txns
