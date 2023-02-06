@@ -9,7 +9,6 @@ Objects to be used in the simulator
 """
 
 import numpy as np
-import simpy
 from hashlib import sha256
 from time import time
 
@@ -25,7 +24,7 @@ class Transaction:
     """
     def __init__(self, sender, receiver, amount):
         self.timestamp = time()
-        self.TxID = sha256(str(np.random.randint(1,1000))+(str(self.timestamp).encode('utf-8'))).hexdigest()
+        self.TxID = sha256(str((np.random.randint(1,1000))+str(self.timestamp)).encode('utf-8')).hexdigest()
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
@@ -33,7 +32,7 @@ class Transaction:
         self.string = None
 
         def __str__(self):
-            if self.sender is not -1:
+            if self.sender is not None:
                 self.string = str(self.TxID) + ": " + str(self.sender) + " pays " + str(self.receiver) + str(self.amount) + " coins"
             else:
                 self.string = str(self.TxID) + ": " + str(self.sender) + " mines " + str(self.amount) + " coins"
@@ -50,7 +49,7 @@ class Block:
     reward = 50
     def __init__(self, data):
         self.timestamp = time()
-        self.BlkID = sha256(self.timestamp).encode('utf-8').hexdigest()
+        self.BlkID = sha256(str(self.timestamp).encode('utf-8')).hexdigest()
         self.data = data
         self.size = 8e3
         self.parent = None
@@ -101,20 +100,20 @@ class Node:
     unused_txns = list of unused transactions (list)
     env = environment (simpy)
     """
-    genesisBlock = Block([],None)
+    genesisBlock = Block([])
     genesisBlock.blkid = sha256(str(0).encode('utf-8')).hexdigest()
     chain = BlockChain(genesisBlock)
     init_time = time()
 
     def __init__(self, ID, speed, CPU, env):
         self.ID = ID
+        self.sim_time = time()
         self.speed = speed
         self.CPU = CPU
         self.balance = 1000
         self.neighbours = []
         self.env = env
         self.tx_time = None #TODO: Same for all?
-        self.graph = None
 
         self.tk = self.init_time
         self.Tk = np.random.exponential(600/self.CPU)
@@ -175,15 +174,7 @@ class Node:
                     self.unused_txns.remove(txn)
                 return True           
 
-class Graph:
-    """
-    Graph class
-    nodes = list of nodes (list)
-    latency = list of latencies (dictionary)
-    """
-    def __init__(self, nodes, latency):
-        self.nodes = nodes
-        self.latency = latency
+latency = {}
 
 
 

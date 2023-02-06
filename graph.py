@@ -9,7 +9,7 @@ File to handle the initialization of the graph and latencies
 """
 
 import numpy as np
-from objects import Node, Graph, Block, Transaction
+from objects import latency
 
 c_slow = 5e3
 c_fast = 1e5
@@ -19,6 +19,8 @@ def create_graph(node_list):
     Creates a connected graph
     4-8 neighbours for each node
     """
+    global c_slow, c_fast, latency
+
     number_of_neighbours = {}
     edges = []
     latency = {}
@@ -56,25 +58,22 @@ def create_graph(node_list):
             if number_of_neighbours[n2.ID] == 0:
                 del nodes[n2.ID]
 
-    g = Graph(node_list, latency)
-    for node in node_list:
-        node.graph = g
-    return g
+    return 
 
-def isConnected(graph):
+def isConnected(nodelist):
     """
     Checks if the graph is connected
     """
     #Check if the number of neighbours is correct
-    for i in graph.nodes:
+    for i in nodelist:
         if len(i.neighbours) < 4 or len(i.neighbours) > 8:
             return False
 
     #Create a visited array and do BFS
-    visited = [False] * (len(graph.nodes) + 1)
+    visited = [False] * (len(nodelist) + 1)
     queue = []
-    queue.append(graph.nodes[0])
-    visited[graph.nodes[0].ID] = True
+    queue.append(nodelist[0].ID)
+    visited[nodelist[0].ID] = True
 
     while queue:
         s = queue.pop(0)
@@ -93,9 +92,8 @@ def prop_delay(node1, node2, msg):
     """
     Returns the time to propagate a message from node1 to node2
     """
-    graph = node1.graph
     if node1.ID in node2.neighbours:
-        p, speed, d = graph.latency[(node1.ID, node2.ID)]
+        p, speed, d = latency[(node1.ID, node2.ID)]
         return p + (msg.size)/speed + d
     else:
         return 0
