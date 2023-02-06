@@ -42,10 +42,3 @@ for sim in sim_list:
 
 
 
-
-
-
-
-
-
-
