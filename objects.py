@@ -161,11 +161,15 @@ class Node:
                 while old_last.BlkID != common.BlkID:
                     for txn in old_last.data:
                         self.unused_txns.append(txn)
+                        self.ledger[txn.sender]+=txn.amount
+                        self.ledger[txn.receiver]-=txn.amount
                     old_last = old_last.parent
                 
                 while parent.BlkID != common.BlkID:
                     for txn in parent.data:
                         self.unused_txns.remove(txn)
+                        self.ledger[txn.sender]-=txn.amount
+                        self.ledger[txn.receiver]+=txn.amount
                     parent = parent.parent
 
                 self.last_block = block
