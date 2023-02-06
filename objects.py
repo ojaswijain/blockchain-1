@@ -31,7 +31,6 @@ class Transaction:
         self.amount = amount
         self.size = 8e3
         self.string = None
-        self.inChain = False
 
         def __str__(self):
             if self.sender is not -1:
@@ -49,13 +48,13 @@ class Block:
     size = size of the block (int (bits))
     """
     reward = 50
-    def __init__(self, data, miner):
+    def __init__(self, data):
         self.timestamp = time()
         self.BlkID = sha256(self.timestamp).encode('utf-8').hexdigest()
         self.data = data
         self.size = 8e3
         self.parent = None
-        self.miner = miner
+        self.chain_length = 1
 
 class BlockChain:
     """
@@ -67,19 +66,24 @@ class BlockChain:
         self.chain.append(blk)
 
     def add_block(self, blk):
+
+        # Check if block already exists
         for block in self.chain:
             if blk.BlkID == block.BlkID:
                 return False
-        last_block = self.chain[-1]
-        blk.parent = last_block.BlkID
+
+        # Check if parent exists
+        check = False
+        for block in self.chain:
+            if blk.parent.BlkID == block.BlkID:
+                check = True
+        if check == False:
+            return False
+        
+        # Check if parent is the last block    
+        blk.chain_length = blk.parent.chain_length + 1
         self.chain.append(blk)
         return True
-    
-    def get_block(self):
-        return self.chain[-1]
-
-    def remove_last_block(self):
-        self.chain.pop()
     
     def show_chain(self):
         for block in self.chain:
@@ -108,44 +112,62 @@ class Node:
         self.CPU = CPU
         self.balance = 1000
         self.neighbours = []
-        self.unused_txns = []
-        self.blocklist = [self.genesisBlock]
         self.env = env
+        self.tx_time = None #TODO: Same for all?
+        self.graph = None
+
+        self.unused_txns = []
         self.LocalChain = self.chain
         self.last_block = self.genesisBlock
         self.last_block_time = self.init_time
         self.last_txn_time = self.init_time
-        self.tx_time = None #TODO
-        self.tx_queue = {}
         self.blk_queue = {}
-        self.graph = None
+        self.txn_queue = {}
+        self.ledger = {}
 
-    def isFork(self, block, time):
-        if block.parent == self.localChain.get_block().parent and block.BlkID != self.localChain.get_block().BlkID:
-            if time > self.last_block_time:
-                self.last_block_time = time
-                self.last_block = block
-                self.blocklist.append(block)
-                return True
-            else:
-                #TODO: add transactions to unused_txns
-                self.LocalChain.remove_last_block()
-                #TODO: remove transactions from unused_txns
-                self.LocalChain.add_block(block)
-                self.blocklist.append(block)
-
+    def isFork(self, block):
+        if block.parent.BlkID == self.last_block.BlkID:
+            return False
+        if block.chain_length > self.last_block.chain_length:
+            return True
         return False
 
     def update(self, block, time):
-        if block.BlkID == self.localChain.get_block().BlkID:
-            return False
-        block.parent = self.localChain.get_block().BlkID
-        #TODO: remove transactions from unused_txns
-        self.LocalChain.add_block(block)
-        self.blocklist.append(block)
-        self.last_block_time = time
-        return True
+        if self.LocalChain.add_block(block):
+            if not self.isFork(block) and block.chain_length > self.last_block.chain_length:
+                self.last_block = block
+                self.last_block_time = time
+                for txn in block.data:
+                    #TODO: Update ledger
+                    self.unused_txns.remove(txn)
+                return True
+            elif self.isFork(block):
+                parent = block.parent
+                old_last = self.last_block
+                common = None
                 
+                while parent.BlkID != old_last.BlkID:
+                    old_last = old_last.parent
+                    parent = parent.parent
+                common = parent
+                parent = block.parent
+                old_last = self.last_block
+                
+                while old_last.BlkID != common.BlkID:
+                    for txn in old_last.data:
+                        self.unused_txns.append(txn)
+                    old_last = old_last.parent
+                
+                while parent.BlkID != common.BlkID:
+                    for txn in parent.data:
+                        self.unused_txns.remove(txn)
+                    parent = parent.parent
+
+                self.last_block = block
+                self.last_block_time = time
+                for txn in block.data:
+                    self.unused_txns.remove(txn)
+                return True           
 
 class Graph:
     """

@@ -48,14 +48,14 @@ def create_block(node):
     #Creating a block
     block = Block(node)
     block.timestamp = time()
-    block.parent = node.blockchain[-1].BlkID
+    block.parent = node.last_block
     #Adding transactions
-    for txn in node.unused_txns:
+    for txn in node.unused_txns[:10]:
         block.add_transaction(txn)
     #Adding block to blockchain
-    node.blockchain.add_block(block)
+    node.update(block, block.timestamp)
     #Removing transactions from unused_txns
-    node.unused_txns = []
+    node.unused_txns = node.unused_txns[10:]
     #Broadcasting block
     broadcast_block(block, node, block.timestamp)
     node.balance += block.reward
