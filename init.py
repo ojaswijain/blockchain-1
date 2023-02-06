@@ -46,12 +46,18 @@ def create_block(node):
     if len(node.unused_txns) == 0:
         return
     #Creating a block
+    newledger = node.ledger.copy()
     block = Block(node)
     block.timestamp = time()
     block.parent = node.last_block
     #Adding transactions
     for txn in node.unused_txns[:10]:
-        block.add_transaction(txn)
+        newledger[txn.sender]-=txn.amount
+        newledger[txn.receiver]+=txn.amount
+        if(newledger[txn.sender]<0):
+            return
+        block.data.append(txn)
+    node.ledger = newledger
     #Adding block to blockchain
     node.update(block, block.timestamp)
     #Removing transactions from unused_txns
