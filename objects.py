@@ -9,7 +9,6 @@ Objects to be used in the simulator
 """
 
 import numpy as np
-import simpy
 from hashlib import sha256
 from time import time
 
@@ -33,7 +32,7 @@ class Transaction:
         self.string = None
 
         def __str__(self):
-            if self.sender is not -1:
+            if self.sender is not None:
                 self.string = str(self.TxID) + ": " + str(self.sender) + " pays " + str(self.receiver) + str(self.amount) + " coins"
             else:
                 self.string = str(self.TxID) + ": " + str(self.sender) + " mines " + str(self.amount) + " coins"
@@ -108,13 +107,13 @@ class Node:
 
     def __init__(self, ID, speed, CPU, env):
         self.ID = ID
+        self.sim_time = time()
         self.speed = speed
         self.CPU = CPU
         self.balance = 1000
         self.neighbours = []
         self.env = env
         self.tx_time = None #TODO: Same for all?
-        self.graph = None
 
         self.unused_txns = []
         self.LocalChain = self.chain
@@ -169,15 +168,7 @@ class Node:
                     self.unused_txns.remove(txn)
                 return True           
 
-class Graph:
-    """
-    Graph class
-    nodes = list of nodes (list)
-    latency = list of latencies (dictionary)
-    """
-    def __init__(self, nodes, latency):
-        self.nodes = nodes
-        self.latency = latency
+latency = {}
 
 
 
