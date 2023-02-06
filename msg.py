@@ -9,6 +9,8 @@ Handling transmission and reception of tranasctions
 """
 
 from graph import prop_delay
+from init import create_block
+import numpy
 
 def broadcast_transaction(txn, node, time):
     """
@@ -28,13 +30,18 @@ def broadcast_block(block, node, time):
     Broadcasts a block from a node
     """
     node.block_queue[block.BlkID] = time
+
+    if(node.tk + node.Tk < time):
+        create_block(node)
+    
+    node.tk = time
+    node.Tk = numpy.random.exponential(600/node.CPU)
     for neighbour in node.neighbours:
         if block.BlkID not in neighbour.block_queue.keys():
             time = time + prop_delay(node, neighbour, block)
             neighbour.block_queue[block.BlkID] = time
-            if not(neighbour.isFork()):
-                neighbour.update(block, time)
-                broadcast_block(block, neighbour, time)
+            neighbour.update(block, time)
+            broadcast_block(block, neighbour, time)
     return
 
 

@@ -116,6 +116,8 @@ class Node:
         self.tx_time = None #TODO: Same for all?
         self.graph = None
 
+        self.tk = self.init_time
+        self.Tk = np.random.exponential(600/self.CPU)
         self.unused_txns = []
         self.LocalChain = self.chain
         self.last_block = self.genesisBlock
@@ -124,6 +126,10 @@ class Node:
         self.blk_queue = {}
         self.txn_queue = {}
         self.ledger = {}
+    
+    # def trycreateblock(self, time):
+    #     Tk = xxx
+    #     if(self.last_block_time )
 
     def isFork(self, block):
         if block.parent.BlkID == self.last_block.BlkID:
