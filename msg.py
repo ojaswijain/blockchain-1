@@ -40,6 +40,12 @@ def broadcast_block(block, node, time):
         if block.BlkID not in neighbour.block_queue.keys():
             time = time + prop_delay(node, neighbour, block)
             neighbour.block_queue[block.BlkID] = time
+            newledger = node.ledger.copy()
+            for txn in block.data:
+                newledger[txn.sender]-=txn.amount
+                newledger[txn.receiver]+=txn.amount
+                if(newledger[txn.sender]<0):
+                    return
             neighbour.update(block, time)
             broadcast_block(block, neighbour, time)
     return
