@@ -11,7 +11,7 @@ Objects to be used in the simulator
 import numpy as np
 import simpy
 from hashlib import sha256
-from datetime import datetime
+from time import time
 
 class Transaction:
     """
@@ -24,8 +24,8 @@ class Transaction:
     size = size of the transaction (int (bits))
     """
     def __init__(self, sender, receiver, amount):
-        self.timestamp = datetime.now()
-        self.TxID = sha256(str(self.timestamp).encode('utf-8')).hexdigest()
+        self.timestamp = time()
+        self.TxID = sha256(str(np.random.randint(1,1000))+(str(self.timestamp).encode('utf-8'))).hexdigest()
         self.sender = sender
         self.receiver = receiver
         self.amount = amount
@@ -50,8 +50,8 @@ class Block:
     """
     reward = 50
     def __init__(self, data, miner):
-        self.timestamp = datetime.now()
-        self.BlkID = sha256(str(datetime.now()).encode('utf-8')).hexdigest()
+        self.timestamp = time()
+        self.BlkID = sha256(self.timestamp).encode('utf-8').hexdigest()
         self.data = data
         self.size = 8e3
         self.parent = None
@@ -100,7 +100,7 @@ class Node:
     genesisBlock = Block([],None)
     genesisBlock.blkid = sha256(str(0).encode('utf-8')).hexdigest()
     chain = BlockChain(genesisBlock)
-    init_time = datetime.now()
+    init_time = time()
 
     def __init__(self, ID, speed, CPU, env):
         self.ID = ID
@@ -128,7 +128,9 @@ class Node:
                 self.blocklist.append(block)
                 return True
             else:
+                #TODO: add transactions to unused_txns
                 self.LocalChain.remove_last_block()
+                #TODO: remove transactions from unused_txns
                 self.LocalChain.add_block(block)
                 self.blocklist.append(block)
 
@@ -138,6 +140,7 @@ class Node:
         if block.BlkID == self.localChain.get_block().BlkID:
             return False
         block.parent = self.localChain.get_block().BlkID
+        #TODO: remove transactions from unused_txns
         self.LocalChain.add_block(block)
         self.blocklist.append(block)
         self.last_block_time = time
@@ -148,7 +151,7 @@ class Graph:
     """
     Graph class
     nodes = list of nodes (list)
-    latency = list of latencies (list)
+    latency = list of latencies (dictionary)
     """
     def __init__(self, nodes, latency):
         self.nodes = nodes

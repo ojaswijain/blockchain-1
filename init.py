@@ -8,7 +8,7 @@ Building a discrete event simulator for a P2P cryptocurrency network
 File to initialize and modify the blockchain and the objects
 """
 
-from datetime import datetime
+from time import time
 from hashlib import sha256
 import numpy as np
 from objects import Node, Block, Transaction
@@ -47,7 +47,7 @@ def create_block(node):
         return
     #Creating a block
     block = Block(node)
-    block.timestamp = datetime.now()
+    block.timestamp = time()
     block.parent = node.blockchain[-1].BlkID
     #Adding transactions
     for txn in node.unused_txns:
