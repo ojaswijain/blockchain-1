@@ -12,6 +12,8 @@ from datetime import datetime
 from hashlib import sha256
 import numpy as np
 from objects import Node, Block, Transaction
+from graph import Graph
+from msg import broadcast_transaction, broadcast_block
 
 def gen_nodes(number_of_nodes, z0, z1):
     """
@@ -26,9 +28,13 @@ def gen_nodes(number_of_nodes, z0, z1):
         node_list.append(Node(i+1, speed_enum[speed[i]], type_enum[type[i]]))
     return node_list
     
-
-def create_genesis_block():
+def gen_transaction(sender):
     """
-    Creates the genesis block
+    Generates a transaction
     """
-    return Block(0, datetime.now(), "Genesis Block", "0")
+    receiver = np.random.choice(sender.neighbours)
+    amount = np.random.randint(1, sender.balance)
+    txn = Transaction(sender, receiver, amount)
+    sender.unused_txns.append(txn)
+    sender.last_txn_time = txn.timestamp
+    broadcast_transaction(txn, sender, txn.timestamp)

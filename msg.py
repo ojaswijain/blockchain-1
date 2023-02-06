@@ -9,35 +9,32 @@ Handling transmission and reception of tranasctions
 """
 
 from objects import Transaction, Block, Node
+from graph import prop_delay
 
-def transmit_transaction(txn, node, time):
+def broadcast_transaction(txn, node, time):
     """
-    Transmits a transaction to a node
+    Broadcasts a transaction from a node
     """
     for neighbour in node.neighbours:
-        if txn not in neighbour.txn_queue.keys():
+        if txn not in neighbour.txn_queue.keys() and not (node == neighbour):
             neighbour.unused_txns.append(txn)
+            time = time + prop_delay(node, neighbour, txn)
+            neighbour.txn_queue[txn] = time
+            broadcast_transaction(txn, neighbour, time)
+    return
 
-
-    pass
-
-def transmit_block(block, node):
+def broadcast_block(block, node, time):
     """
-    Transmits a block to a node
+    Broadcasts a block from a node
     """
-    pass
-
-def receive_transaction(transaction, node):
-    """
-    Receives a transaction from a node
-    """
-    pass
-
-def receive_block(block, node):
-    """
-    Receives a block from a node
-    """
-    pass
+    for neighbour in node.neighbours:
+        if block not in neighbour.block_queue.keys() and not (node == neighbour):
+            time = time + prop_delay(node, neighbour, block)
+            neighbour.block_queue[block.BlkID] = time
+            if not(neighbour.isFork()):
+                neighbour.update(block, time)
+                broadcast_block(block, neighbour, time)
+    return
 
 
     

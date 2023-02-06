@@ -76,6 +76,9 @@ class BlockChain:
     
     def get_block(self):
         return self.chain[-1]
+
+    def remove_last_block(self):
+        self.chain.pop()
     
     def show_chain(self):
         for block in self.chain:
@@ -90,7 +93,7 @@ class Node:
     Balance = balance of the node (string)
     blockchain = blockchain of the node (list)
     neighbours = list of connected nodes (list)
-    unused_transactions = list of unused transactions (list)
+    unused_txns = list of unused transactions (list)
     env = environment (simpy)
     """
     genesisBlock = Block([],None)
@@ -104,7 +107,7 @@ class Node:
         self.CPU = CPU
         self.balance = 1000
         self.neighbours = []
-        self.unused_transactions = []
+        self.unused_txns = []
         self.blocklist = [self.genesisBlock]
         self.env = env
         self.LocalChain = self.chain
@@ -114,6 +117,31 @@ class Node:
         self.tx_time = None #TODO
         self.tx_queue = {}
         self.blk_queue = {}
+        self.graph = None
+
+    def isFork(self, block, time):
+        if block.parent == self.localChain.get_block().parent and block.blkid != self.localChain.get_block().blkid:
+            if time > self.last_block_time:
+                self.last_block_time = time
+                self.last_block = block
+                self.blocklist.append(block)
+                return True
+            else:
+                self.LocalChain.remove_last_block()
+                self.LocalChain.add_block(block)
+                self.blocklist.append(block)
+
+        return False
+
+    def update(self, block, time):
+        if block.BlkID == self.localChain.get_block().BlkID:
+            return False
+        block.parent = self.localChain.get_block().BlkID
+        self.LocalChain.add_block(block)
+        self.blocklist.append(block)
+        self.last_block_time = time
+        return True
+                
 
 class Graph:
     """

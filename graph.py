@@ -56,7 +56,10 @@ def create_graph(node_list):
             if number_of_neighbours[n2.ID] == 0:
                 del nodes[n2.ID]
 
-    return Graph(node_list, latency)
+    g = Graph(node_list, latency)
+    for node in node_list:
+        node.graph = g
+    return g
 
 def isConnected(graph):
     """
@@ -86,10 +89,11 @@ def isConnected(graph):
             return False
     return True
 
-def prop_delay(graph, node1, node2, msg):
+def prop_delay(node1, node2, msg):
     """
     Returns the time to propagate a message from node1 to node2
     """
+    graph = node1.graph
     if node1.ID in node2.neighbours:
         p, speed, d = graph.latency[(node1.ID, node2.ID)]
         return p + (msg.size)/speed + d
