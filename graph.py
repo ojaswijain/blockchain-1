@@ -10,8 +10,8 @@ File to handle the initialization of the graph and latencies
 
 import numpy as np
 
-c_slow = 5e3
-c_fast = 1e5
+c_slow = 5e6
+c_fast = 1e8
 
 def create_graph(node_list):
     """
@@ -38,7 +38,7 @@ def create_graph(node_list):
             n1.neighbours.append(n2)
             n2.neighbours.append(n1)
             #Latency implementation
-            p = np.random.uniform(10, 500)
+            p = np.random.uniform(10, 500)*1e-3
             speed = 0
             if n1.speed == "slow" or n2.speed == "slow":
                 speed = c_slow

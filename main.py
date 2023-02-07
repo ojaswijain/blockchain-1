@@ -34,4 +34,4 @@ for node in nodelist:
 for sim in sim_list:
     sim.simulate()
 
-env.run(until=50)
+env.run(until=1e8)

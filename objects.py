@@ -117,7 +117,7 @@ class Node:
         self.balance = 1000
         self.neighbours = []
         self.env = env
-        self.tx_time = 1000 #TODO: Same for all?
+        self.tx_time = 1e-2
         self.Tk_mean = None
         self.Tk = None
 
@@ -152,6 +152,9 @@ class Node:
                 self.last_block_time = time
                 for txn in block.data:
                     #TODO: Update ledger
+                    if txn.sender is not None:
+                        self.ledger[txn.sender]-=txn.amount
+                    self.ledger[txn.receiver]+=txn.amount
                     if txn in self.unused_txns: 
                         self.unused_txns.remove(txn)
                 return True

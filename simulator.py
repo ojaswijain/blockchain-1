@@ -21,10 +21,10 @@ class Simulator:
         self.env.process(self.run())
     
     def simulate(self):
-        if (self.node.sim_time - self.node.last_txn_time) > np.random.exponential(self.node.tx_time)/1000:
+        if (self.node.sim_time - self.node.last_txn_time) > np.random.exponential(self.node.tx_time):
             gen_transaction(self.node)
 
-        if (self.node.sim_time - self.node.last_block_time) > self.node.Tk/1000:
+        if (self.node.sim_time - self.node.last_block_time) > self.node.Tk:
             create_block(self.node)
 
         return

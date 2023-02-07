@@ -30,7 +30,7 @@ def gen_nodes(number_of_nodes, z0, z1):
             node_list[i].ledger[idx] = 1000
     h = 1/((10*(1-z1)+z1)*number_of_nodes)
     for i in range(number_of_nodes):
-        if node_list[i].speed == "low":
+        if node_list[i].CPU == "low":
             node_list[i].Tk_mean = node_list[i].interArrival/h
         else:
             node_list[i].Tk_mean = node_list[i].interArrival/(h*10)
@@ -56,20 +56,30 @@ def create_block(node):
     if len(node.unused_txns) == 0:
         return
     #Creating a block
+    print(node.Tk)
+    node.Tk = np.random.exponential(node.Tk_mean)
     newledger = node.ledger.copy()
     block = Block([])
     block.parent = node.last_block
-    print("Block with ID: ", block.BlkID, " created by node: ", node.ID)
+    print("Block with ID: ", block.BlkID, " created by node: ", node.ID, node.speed)
     block.timestamp = time()
     block.parent = node.last_block
+    node.last_block_time = block.timestamp
     #Adding transactions
-    for txn in node.unused_txns[:10]:
+    x=0
+    y=0
+    while x<10 and y<len(node.unused_txns):
+        txn = node.unused_txns[y]
+        y+=1
         newledger[txn.sender]-=txn.amount
         newledger[txn.receiver]+=txn.amount
         if(newledger[txn.sender]<0):
-            return
+            newledger[txn.sender]+=txn.amount
+            newledger[txn.receiver]-=txn.amount
+            continue
         block.data.append(txn)
         block.size += txn.size
+        x+=1
     #Adding miner reward
     txn_miner = Transaction(None, node.ID, block.reward)
     block.data.append(txn_miner)
@@ -79,8 +89,7 @@ def create_block(node):
     #Adding block to blockchain
     node.update(block, block.timestamp)
     #Removing transactions from unused_txns
-    node.unused_txns = node.unused_txns[10:]
+    node.unused_txns = node.unused_txns[y:]
     #Broadcasting block
     broadcast_block(block, node, block.timestamp)
     node.balance += block.reward
-    node.Tk = np.random.exponential(node.Tk_mean)
