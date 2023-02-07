@@ -11,6 +11,7 @@ Objects to be used in the simulator
 import numpy as np
 from hashlib import sha256
 from time import time
+import copy
 
 class Transaction:
     """
@@ -60,9 +61,9 @@ class BlockChain:
     BlockChain class
     chain = list of blocks (list)
     """
-    chain = []
+    # chain = []
     def __init__(self, blk):
-        self.chain.append(blk)
+        self.chain=[blk]
 
     def add_block(self, blk):
 
@@ -120,7 +121,7 @@ class Node:
         # self.tk = self.init_time
         # self.Tk = np.random.exponential(600/self.CPU)
         self.unused_txns = []
-        self.LocalChain = self.chain
+        self.LocalChain = copy.deepcopy(self.chain)
         self.last_block = self.genesisBlock
         self.last_block_time = self.init_time
         self.last_txn_time = self.init_time
