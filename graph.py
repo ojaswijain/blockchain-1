@@ -9,7 +9,6 @@ File to handle the initialization of the graph and latencies
 """
 
 import numpy as np
-from objects import latency
 
 c_slow = 5e3
 c_fast = 1e5
@@ -19,12 +18,11 @@ def create_graph(node_list):
     Creates a connected graph
     4-8 neighbours for each node
     """
-    global c_slow, c_fast, latency
 
     number_of_neighbours = {}
     edges = []
     latency = {}
-    nodes = node_list
+    nodes = node_list.copy()
 
     #Generating random number of neighbours for each node
     for node in node_list:
@@ -39,7 +37,6 @@ def create_graph(node_list):
             edges.append((n1.ID, n2.ID))
             n1.neighbours.append(n2)
             n2.neighbours.append(n1)
-            
             #Latency implementation
             p = np.random.uniform(10, 500)
             speed = 0
@@ -54,11 +51,14 @@ def create_graph(node_list):
             number_of_neighbours[n1.ID] -= 1
             number_of_neighbours[n2.ID] -= 1
             if number_of_neighbours[n1.ID] == 0:
-                del nodes[n1.ID]
+                nodes.remove(n1)
             if number_of_neighbours[n2.ID] == 0:
-                del nodes[n2.ID]
+                nodes.remove(n2)
 
-    return 
+    print("Graph created")
+    for node in node_list:
+        node.latency = latency
+    return
 
 def isConnected(nodelist):
     """
@@ -70,9 +70,9 @@ def isConnected(nodelist):
             return False
 
     #Create a visited array and do BFS
-    visited = [False] * (len(nodelist) + 1)
+    visited = [False] * len(nodelist)
     queue = []
-    queue.append(nodelist[0].ID)
+    queue.append(nodelist[0])
     visited[nodelist[0].ID] = True
 
     while queue:
@@ -92,8 +92,11 @@ def prop_delay(node1, node2, msg):
     """
     Returns the time to propagate a message from node1 to node2
     """
-    if node1.ID in node2.neighbours:
-        p, speed, d = latency[(node1.ID, node2.ID)]
+    if (node1.ID, node2.ID) in node1.latency.keys():
+        (p, speed, d) = node1.latency[(node1.ID, node2.ID)]
+        return p + (msg.size)/speed + d
+    elif (node2.ID, node1.ID) in node1.latency.keys():
+        (p, speed, d) = node1.latency[(node2.ID, node1.ID)]
         return p + (msg.size)/speed + d
     else:
         return 0

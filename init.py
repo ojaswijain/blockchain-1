@@ -23,11 +23,11 @@ def gen_nodes(number_of_nodes, z0, z1):
     speed_enum = {0: "slow", 1: "fast"}
     type_enum = {0: "low", 1: "high"}
     for i in range(number_of_nodes):
-        node_list.append(Node(i+1, speed_enum[speed[i]], type_enum[type[i]]))
+        node_list.append(Node(i, speed_enum[speed[i]], type_enum[type[i]]))
     for i in range(number_of_nodes):
         for j in range(number_of_nodes):
-            idx = str(j+1)
-            node_list[i+1].ledger[idx] = 1000
+            idx = j
+            node_list[i].ledger[idx] = 1000
     return node_list
     
 def gen_transaction(sender):
@@ -39,6 +39,7 @@ def gen_transaction(sender):
     txn = Transaction(sender.ID, receiver.ID, amount)
     sender.unused_txns.append(txn)
     sender.last_txn_time = txn.timestamp
+    # print("Transaction with TxID: ", txn.TxID, " created by node: ", sender.ID, "to node: ", receiver.ID, "at time: ", txn.timestamp)
     broadcast_transaction(txn, sender, txn.timestamp)
 
 def create_block(node):
@@ -49,7 +50,9 @@ def create_block(node):
         return
     #Creating a block
     newledger = node.ledger.copy()
-    block = Block(node)
+    block = Block([])
+    block.parent = node.last_block
+    print("Block with ID: ", block.BlkID, " created by node: ", node.ID)
     block.timestamp = time()
     block.parent = node.last_block
     #Adding transactions
@@ -61,10 +64,10 @@ def create_block(node):
         block.data.append(txn)
         block.size += txn.size
     #Adding miner reward
-    txn_miner = Transaction(None, node, block.reward)
+    txn_miner = Transaction(None, node.ID, block.reward)
     block.data.append(txn_miner)
     block.size += txn_miner.size
-    newledger[node]+=block.reward
+    newledger[node.ID]+=block.reward
     node.ledger = newledger
     #Adding block to blockchain
     node.update(block, block.timestamp)

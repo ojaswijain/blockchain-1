@@ -27,14 +27,26 @@ def broadcast_block(block, node, time):
     """
     Broadcasts a block from a node
     """
+    print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
     node.block_queue[block.BlkID] = time
+
     for neighbour in node.neighbours:
         if block.BlkID not in neighbour.block_queue.keys():
-            time = time + prop_delay(node, neighbour, block)
+            delay = prop_delay(node, neighbour, block)
+            print("Delay: ", delay, " from node: ", node.ID, " to node: ", neighbour.ID)
+            time_new = time + delay
             neighbour.block_queue[block.BlkID] = time
-            if not(neighbour.isFork()):
-                neighbour.update(block, time)
-                broadcast_block(block, neighbour, time)
+            newledger = neighbour.ledger.copy()
+            for txn in block.data:
+                # print("TxID: ", txn.TxID, " created by node: ", txn.sender, "to node: ", txn.receiver)
+                if txn.sender is not None:
+                    newledger[txn.sender]-=txn.amount
+                    if(newledger[txn.sender]<0):
+                        return
+                newledger[txn.receiver]+=txn.amount
+            neighbour.ledger = newledger
+            neighbour.update(block, time_new)
+            broadcast_block(block, neighbour, time_new)
     return
 
 

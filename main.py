@@ -9,16 +9,13 @@ Main file to run the simulator
 """
 
 import simpy
-import numpy as np
 from simulator import Simulator
 from init import gen_nodes
-from objects import Node, Transaction, Block
 from graph import create_graph, isConnected
 
-n = 100
+n = 10
 z0 = 0.1
 z1 = 0.1
-
 
 nodelist = gen_nodes(n, z0, z1)
 create_graph(nodelist)
@@ -31,18 +28,13 @@ env = simpy.Environment()
 sim_list = []
 
 for node in nodelist:
-    print(1)
+    node.env = env
     sim_list.append(Simulator(node))
 
 for sim in sim_list:
-    sim.run()
+    sim.simulate()
 
-
-
-
-
-
-
+env.run(until=100)
 
 
 

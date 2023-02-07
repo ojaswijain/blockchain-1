@@ -17,14 +17,15 @@ class Simulator:
 
     def __init__(self, node):
         self.node = node
+        self.env = node.env
         self.env.process(self.run())
     
     def simulate(self):
         if (self.node.sim_time - self.node.last_txn_time) > np.random.exponential(self.node.tx_time)/1000:
-            self.node.gen_transaction()
+            gen_transaction(self.node)
 
         if (self.node.sim_time - self.node.last_block_time) > np.random.exponential(self.node.tx_time)/1000: #TODO: Hashing power
-            self.node.create_block()
+            create_block(self.node)
 
         return
 
