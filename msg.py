@@ -10,6 +10,8 @@ Handling transmission and reception of tranasctions
 
 from graph import prop_delay
 
+#TODO: Change DFS to BFS
+
 def broadcast_transaction(txn, node, time):
     """
     Broadcasts a transaction from a node
@@ -38,7 +40,6 @@ def broadcast_block(block, node, time):
             neighbour.block_queue[block.BlkID] = time
             newledger = neighbour.ledger.copy()
             for txn in block.data:
-                # print("TxID: ", txn.TxID, " created by node: ", txn.sender, "to node: ", txn.receiver)
                 if txn.sender is not None:
                     newledger[txn.sender]-=txn.amount
                     if(newledger[txn.sender]<0):
@@ -48,8 +49,3 @@ def broadcast_block(block, node, time):
             neighbour.update(block, time_new)
             broadcast_block(block, neighbour, time_new)
     return
-
-
-    
-
-

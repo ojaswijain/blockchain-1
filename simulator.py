@@ -24,7 +24,7 @@ class Simulator:
         if (self.node.sim_time - self.node.last_txn_time) > np.random.exponential(self.node.tx_time)/1000:
             gen_transaction(self.node)
 
-        if (self.node.sim_time - self.node.last_block_time) > np.random.exponential(self.node.tx_time)/1000: #TODO: Hashing power
+        if (self.node.sim_time - self.node.last_block_time) > self.node.Tk/1000:
             create_block(self.node)
 
         return

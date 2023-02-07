@@ -28,6 +28,13 @@ def gen_nodes(number_of_nodes, z0, z1):
         for j in range(number_of_nodes):
             idx = j
             node_list[i].ledger[idx] = 1000
+    h = 1/((10*(1-z1)+z1)*number_of_nodes)
+    for i in range(number_of_nodes):
+        if node_list[i].speed == "low":
+            node_list[i].Tk_mean = node_list[i].interArrival/h
+        else:
+            node_list[i].Tk_mean = node_list[i].interArrival/(h*10)
+        node_list[i].Tk = np.random.exponential(node_list[i].Tk_mean)
     return node_list
     
 def gen_transaction(sender):
@@ -76,3 +83,4 @@ def create_block(node):
     #Broadcasting block
     broadcast_block(block, node, block.timestamp)
     node.balance += block.reward
+    node.Tk = np.random.exponential(node.Tk_mean)

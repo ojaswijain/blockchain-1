@@ -44,7 +44,7 @@ def create_graph(node_list):
                 speed = c_slow
             else:
                 speed = c_fast
-            d = np.random.exponential(96e3/speed)
+            d = 96e3/speed
             latency[(n1.ID, n2.ID)] = (p, speed, d)
 
             #Removing nodes with no more neighbours
@@ -97,7 +97,6 @@ def prop_delay(node1, node2, msg):
         return p + (msg.size)/speed + d
     elif (node2.ID, node1.ID) in node1.latency.keys():
         (p, speed, d) = node1.latency[(node2.ID, node1.ID)]
-        return p + (msg.size)/speed + d
+        return p + (msg.size)/speed + np.random.exponential(d)
     else:
-        return 0
-    
+        return 0    

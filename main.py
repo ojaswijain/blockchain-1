@@ -14,10 +14,10 @@ from init import gen_nodes
 from graph import create_graph, isConnected
 
 n = 10
-z0 = 0.1
-z1 = 0.1
+z0 = 20
+z1 = 50
 
-nodelist = gen_nodes(n, z0, z1)
+nodelist = gen_nodes(n, z0*0.01, z1*0.01)
 create_graph(nodelist)
 
 while not isConnected(nodelist):
@@ -34,11 +34,4 @@ for node in nodelist:
 for sim in sim_list:
     sim.simulate()
 
-env.run(until=100)
-
-
-
-
-
-
-
+env.run(until=50)

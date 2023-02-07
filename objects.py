@@ -52,7 +52,7 @@ class Block:
         self.timestamp = time()
         self.BlkID = sha256((str(np.random.randint(1,1000))+str(self.timestamp)).encode('utf-8')).hexdigest()
         self.data = data
-        self.size = 8e3
+        self.size = 0
         self.parent = None
         self.chain_length = 1
 
@@ -107,6 +107,7 @@ class Node:
     genesisBlock.blkid = sha256(str(0).encode('utf-8')).hexdigest()
     chain = BlockChain(genesisBlock)
     init_time = time()
+    interArrival = 1
 
     def __init__(self, ID, speed, CPU):
         self.ID = ID
@@ -117,6 +118,8 @@ class Node:
         self.neighbours = []
         self.env = env
         self.tx_time = 1000 #TODO: Same for all?
+        self.Tk_mean = None
+        self.Tk = None
 
         # self.tk = self.init_time
         # self.Tk = np.random.exponential(600/self.CPU)
@@ -185,6 +188,3 @@ class Node:
                 return True           
 
 env = None
-
-
-
