@@ -32,11 +32,13 @@ def broadcast_block(block, node, time):
     # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
     node.block_queue[block.BlkID] = time
 
+    timenew = {}
+
     for neighbour in node.neighbours:
         if block.BlkID not in neighbour.block_queue.keys():
             delay = prop_delay(node, neighbour, block)
             # print("Delay: ", delay, " from node: ", node.ID, " to node: ", neighbour.ID)
-            time_new = time + delay
+            timenew[neighbour] = time + delay
             neighbour.block_queue[block.BlkID] = time
             newledger = neighbour.ledger.copy()
             for txn in block.data:
@@ -46,6 +48,9 @@ def broadcast_block(block, node, time):
                         return
                 newledger[txn.receiver]+=txn.amount
             neighbour.ledger = newledger
-            neighbour.update(block, time_new)
-            broadcast_block(block, neighbour, time_new)
+            neighbour.update(block, timenew)
+    
+    for neighbour in node.neighbours:
+        if(neighbour in timenew):
+            broadcast_block(block, neighbour, timenew[neighbour])
     return
