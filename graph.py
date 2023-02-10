@@ -9,7 +9,6 @@ File to handle the initialization of the graph and latencies
 """
 
 import numpy as np
-from simulator import Event
 
 c_slow = 5e6
 c_fast = 1e8
