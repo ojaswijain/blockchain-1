@@ -9,6 +9,7 @@ Handling transmission and reception of tranasctions
 """
 
 from graph import prop_delay
+from simulator import EventQueue, Event
 
 #TODO: Change DFS to BFS
 
@@ -16,26 +17,26 @@ def broadcast_transaction(txn, node, time):
     """
     Broadcasts a transaction from a node
     """
+    events = []
     node.txn_queue[txn.TxID] = time
     for neighbour in node.neighbours:
         if txn.TxID not in neighbour.txn_queue.keys():
             neighbour.unused_txns.append(txn)
-            time = time + prop_delay(node, neighbour, txn)
-            neighbour.txn_queue[txn.TxID] = time
-            broadcast_transaction(txn, neighbour, time)
-    return
+            time_new = time + prop_delay(node, neighbour, txn)
+            neighbour.txn_queue[txn.TxID] = time_new
+            # broadcast_transaction(txn, neighbour, time)
+            events.append(Event(time_new, neighbour, "txn", txn))
+    return events
 
 def broadcast_block(block, node, time):
     """
     Broadcasts a block from a node
     """
     # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
-    node.block_queue[block.BlkID] = time
-
+    events = []
     for neighbour in node.neighbours:
         if block.BlkID not in neighbour.block_queue.keys():
             delay = prop_delay(node, neighbour, block)
-            # print("Delay: ", delay, " from node: ", node.ID, " to node: ", neighbour.ID)
             time_new = time + delay
             neighbour.block_queue[block.BlkID] = time
             newledger = neighbour.ledger.copy()
@@ -43,9 +44,11 @@ def broadcast_block(block, node, time):
                 if txn.sender is not None:
                     newledger[txn.sender]-=txn.amount
                     if(newledger[txn.sender]<0):
-                        return
+                        print("Error: Negative balance")
+                        return []
                 newledger[txn.receiver]+=txn.amount
             neighbour.ledger = newledger
             neighbour.update(block, time_new)
-            broadcast_block(block, neighbour, time_new)
-    return
+            # broadcast_block(block, neighbour, time_new)
+            events.append(Event(time_new, neighbour, "block", block))
+    return events
