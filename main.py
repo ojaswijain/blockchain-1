@@ -11,7 +11,7 @@ Main file to run the simulator
 from simulator import EventQueue
 from init import gen_nodes
 from graph import create_graph, isConnected
-from visualise import visualise_tree
+# from visualise import visualise_tree
 from init import gen_transaction, create_block
 from time import time 
 import numpy as np

@@ -24,6 +24,7 @@ def gen_nodes(number_of_nodes, z0, z1):
     speed_enum = {0: "slow", 1: "fast"}
     type_enum = {0: "low", 1: "high"}
     for i in range(number_of_nodes):
+        print("Node ", i ,speed_enum[speed[i]], type_enum[type[i]])
         node_list.append(Node(i, speed_enum[speed[i]], type_enum[type[i]]))
     for i in range(number_of_nodes):
         for j in range(number_of_nodes):

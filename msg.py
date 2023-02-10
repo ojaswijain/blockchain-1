@@ -39,15 +39,8 @@ def broadcast_block(block, node, time):
             delay = prop_delay(node, neighbour, block)
             time_new = time + delay
             neighbour.block_queue[block.BlkID] = time
-            newledger = neighbour.ledger.copy()
-            for txn in block.data:
-                if txn.sender is not None:
-                    newledger[txn.sender]-=txn.amount
-                    if(newledger[txn.sender]<0):
-                        print("Error: Negative balance")
-                        return []
-                newledger[txn.receiver]+=txn.amount
-            neighbour.ledger = newledger
+            if(neighbour.validate_block(block)==False):
+                return []
             neighbour.update(block, time_new)
             # broadcast_block(block, neighbour, time_new)
             events.append(Event(time_new, neighbour, "block", block))

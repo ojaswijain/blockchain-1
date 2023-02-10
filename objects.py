@@ -66,7 +66,7 @@ class BlockChain:
     def __init__(self, blk):
         self.chain=[blk]
 
-    def add_block(self, blk):
+    def add_block(self, blk, ID):
 
         # Check if block already exists
         for block in self.chain:
@@ -147,12 +147,13 @@ class Node:
         return False
 
     def update(self, block, time):
-        if self.LocalChain.add_block(block):
+        if self.LocalChain.add_block(block, self.ID):
             print("Block with ID: " + block.BlkID + " added to node " + str(self.ID))
             with open(f"log/log_node{self.ID}.txt", "a") as f:
                 f.write("Block ID: " + block.BlkID[:5] + " at " + str(time)+"\n")
             if not self.isFork(block) and block.chain_length > self.last_block.chain_length:
                 self.last_block = block
+                print(block.BlkID, " added to ", self.ID)
                 self.last_block_time = time
                 for txn in block.data:
                     #TODO: Update ledger
@@ -192,12 +193,77 @@ class Node:
                         self.ledger[txn.receiver]+=txn.amount
                     parent = parent.parent
 
+                for txn in block.data:
+                    if txn.sender is not None:
+                        self.ledger[txn.sender]-=txn.amount
+                    self.ledger[txn.receiver]+=txn.amount
+                    if txn in self.unused_txns: 
+                        self.unused_txns.remove(txn)
+
                 self.last_block = block
                 self.last_block_time = time
                 for txn in block.data:
                     if txn in self.unused_txns:
                         self.unused_txns.remove(txn)
                 visualise_chain(self)
-                return True           
+                return True   
+
+    def validate_block(self, block):
+        parent = block.parent
+        check = False
+        for blk in self.chain.chain:
+            if blk.BlkID == parent.BlkID:
+                check = True
+        if check == False:
+            print("Parent not in chain")
+            return False  
+
+        parent = block.parent
+        old_last = self.last_block
+        common = None
+
+        parentancestors = {}
+
+        while parent!= None:
+            parentancestors[parent] = 0
+            parent = parent.parent
+
+        while old_last!=None:
+            if old_last in parentancestors:
+                common = old_last
+                break
+            else:
+                old_last = old_last.parent
+        
+        if(common==None):
+            print("ERROR 1")
+            return False
+        parent = block.parent
+        old_last = self.last_block
+
+        checkledger = self.ledger.copy()
+
+        while old_last.BlkID != common.BlkID:
+            for txn in old_last.data:
+                if txn.sender is not None:
+                    checkledger[txn.sender]+=txn.amount
+                checkledger[txn.receiver]-=txn.amount
+            old_last = old_last.parent
+
+        while parent.BlkID != common.BlkID:
+            for txn in parent.data:
+                if txn.sender is not None:
+                    checkledger[txn.sender]-=txn.amount
+                checkledger[txn.receiver]+=txn.amount
+            parent = parent.parent
+
+        for txn in block.data:
+            if txn.sender is not None:
+                checkledger[txn.sender]-=txn.amount
+                if(checkledger[txn.sender]):
+                    return False
+            checkledger[txn.receiver]+=txn.amount
+
+        return True
 
 env = None
