@@ -12,6 +12,7 @@ from time import time
 import numpy as np
 from objects import Node, Block, Transaction
 from msg import broadcast_transaction, broadcast_block
+from graph import prop_delay
 
 def gen_nodes(number_of_nodes, z0, z1):
     """
@@ -42,12 +43,12 @@ def gen_transaction(sender):
     Generates a transaction
     """
     receiver = np.random.choice(sender.neighbours)
-    amount = np.random.randint(1, sender.balance)
+    amount = np.random.randint(1, sender.balance)//10
     txn = Transaction(sender.ID, receiver.ID, amount)
     sender.unused_txns.append(txn)
     sender.last_txn_time = txn.timestamp
     # print("Transaction with TxID: ", txn.TxID, " created by node: ", sender.ID, "to node: ", receiver.ID, "at time: ", txn.timestamp)
-    broadcast_transaction(txn, sender, txn.timestamp)
+    return broadcast_transaction(txn, sender, txn.timestamp)
 
 def create_block(node):
     """
@@ -56,7 +57,7 @@ def create_block(node):
     if len(node.unused_txns) == 0:
         return
     #Creating a block
-    print(node.Tk)
+    # print(node.Tk)
     node.Tk = np.random.exponential(node.Tk_mean)
     newledger = node.ledger.copy()
     block = Block([])
@@ -91,5 +92,8 @@ def create_block(node):
     #Removing transactions from unused_txns
     node.unused_txns = node.unused_txns[y:]
     #Broadcasting block
-    broadcast_block(block, node, block.timestamp)
-    node.balance += block.reward
+    events = []
+    for neighbour in node.neighbours:
+        delay = prop_delay(node, neighbour, block)
+        time_new = time()+delay
+    return broadcast_block(block, node, block.timestamp)

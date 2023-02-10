@@ -12,13 +12,14 @@ import numpy as np
 from hashlib import sha256
 from time import time
 import copy
+from visualise import visualise_chain
 
 class Transaction:
     """
     Transaction class
     TxID = unique ID of the transaction (string)
     sender = sender of the transaction (int)
-    Put sender as -1 if mining fee is the transaction
+    Put sender as None if mining fee is the transaction
     receiver = receiver of the transaction (int)
     amount = amount of the transaction (int)
     size = size of the transaction (int (bits))
@@ -107,7 +108,7 @@ class Node:
     genesisBlock.blkid = sha256(str(0).encode('utf-8')).hexdigest()
     chain = BlockChain(genesisBlock)
     init_time = time()
-    interArrival = 1
+    interArrival = 2
 
     def __init__(self, ID, speed, CPU):
         self.ID = ID
@@ -140,6 +141,7 @@ class Node:
     def isFork(self, block):
         if block.parent.BlkID == self.last_block.BlkID:
             return False
+        print("Fork detected")
         if block.chain_length > self.last_block.chain_length:
             return True
         return False
@@ -147,6 +149,8 @@ class Node:
     def update(self, block, time):
         if self.LocalChain.add_block(block):
             print("Block with ID: " + block.BlkID + " added to node " + str(self.ID))
+            with open(f"log/log_node{self.ID}.txt", "a") as f:
+                f.write("Block ID: " + block.BlkID[:5] + " at " + str(time)+"\n")
             if not self.isFork(block) and block.chain_length > self.last_block.chain_length:
                 self.last_block = block
                 self.last_block_time = time
@@ -157,6 +161,7 @@ class Node:
                     self.ledger[txn.receiver]+=txn.amount
                     if txn in self.unused_txns: 
                         self.unused_txns.remove(txn)
+                visualise_chain(self)
                 return True
             elif self.isFork(block):
                 parent = block.parent
@@ -173,21 +178,26 @@ class Node:
                 while old_last.BlkID != common.BlkID:
                     for txn in old_last.data:
                         self.unused_txns.append(txn)
-                        self.ledger[txn.sender]+=txn.amount
+                        if txn.sender is not None:
+                            self.ledger[txn.sender]+=txn.amount
                         self.ledger[txn.receiver]-=txn.amount
                     old_last = old_last.parent
                 
                 while parent.BlkID != common.BlkID:
                     for txn in parent.data:
-                        self.unused_txns.remove(txn)
-                        self.ledger[txn.sender]-=txn.amount
+                        if txn in self.unused_txns:
+                            self.unused_txns.remove(txn)
+                        if txn.sender is not None:
+                            self.ledger[txn.sender]-=txn.amount
                         self.ledger[txn.receiver]+=txn.amount
                     parent = parent.parent
 
                 self.last_block = block
                 self.last_block_time = time
                 for txn in block.data:
-                    self.unused_txns.remove(txn)
+                    if txn in self.unused_txns:
+                        self.unused_txns.remove(txn)
+                visualise_chain(self)
                 return True           
 
 env = None

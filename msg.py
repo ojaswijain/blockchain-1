@@ -9,6 +9,7 @@ Handling transmission and reception of tranasctions
 """
 
 from graph import prop_delay
+from simulator import EventQueue, Event
 
 #TODO: Change DFS to BFS
 
@@ -17,6 +18,7 @@ def broadcast_transaction(txn, node, time):
     Broadcasts a transaction from a node
     """
     # node.txn_queue[txn.TxID] = time
+    events = []
     Q = []
     Q.push([node, time])
     visited = []
@@ -30,13 +32,15 @@ def broadcast_transaction(txn, node, time):
                 Q.push([neighbour, newtime])
                 visited.push(neighbour)
                 neighbour.unused_txns.append(txn)
-    return
+                events.append(Event(newtime, neighbour, "txn", txn))
+    return events
 
 def broadcast_block(block, node, time):
     """
     Broadcasts a block from a node
     """
     # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
+    events = []
     Q = []
     Q.push([node, time])
     visited = []
@@ -55,9 +59,11 @@ def broadcast_block(block, node, time):
                     if txn.sender is not None:
                         newledger[txn.sender]-=txn.amount
                         if(newledger[txn.sender]<0):
+                            print("Error: Negative balance")
                             return
                     newledger[txn.receiver]+=txn.amount
                 neighbor.ledger = newledger
                 neighbor.update(block, time_new)
+                events.append(Event(time_new, neighbor, "block", block))
 
-    return
+    return events
