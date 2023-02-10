@@ -16,13 +16,20 @@ def broadcast_transaction(txn, node, time):
     """
     Broadcasts a transaction from a node
     """
-    node.txn_queue[txn.TxID] = time
-    for neighbour in node.neighbours:
-        if txn.TxID not in neighbour.txn_queue.keys():
-            neighbour.unused_txns.append(txn)
-            time = time + prop_delay(node, neighbour, txn)
-            neighbour.txn_queue[txn.TxID] = time
-            broadcast_transaction(txn, neighbour, time)
+    # node.txn_queue[txn.TxID] = time
+    Q = []
+    Q.push([node, time])
+    visited = []
+    visited.push(node)
+
+    while(Q):
+        popnode, popnodetime = Q.pop(0)
+        for neighbour in popnode.neighbours:
+            if(neighbour not in visited):
+                newtime = popnodetime + prop_delay(popnode, neighbour, txn)
+                Q.push([neighbour, newtime])
+                visited.push(neighbour)
+                neighbour.unused_txns.append(txn)
     return
 
 def broadcast_block(block, node, time):
@@ -30,22 +37,27 @@ def broadcast_block(block, node, time):
     Broadcasts a block from a node
     """
     # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
-    node.block_queue[block.BlkID] = time
+    Q = []
+    Q.push([node, time])
+    visited = []
+    visited.push(node)
 
-    for neighbour in node.neighbours:
-        if block.BlkID not in neighbour.block_queue.keys():
-            delay = prop_delay(node, neighbour, block)
-            # print("Delay: ", delay, " from node: ", node.ID, " to node: ", neighbour.ID)
-            time_new = time + delay
-            neighbour.block_queue[block.BlkID] = time
-            newledger = neighbour.ledger.copy()
-            for txn in block.data:
-                if txn.sender is not None:
-                    newledger[txn.sender]-=txn.amount
-                    if(newledger[txn.sender]<0):
-                        return
-                newledger[txn.receiver]+=txn.amount
-            neighbour.ledger = newledger
-            neighbour.update(block, time_new)
-            broadcast_block(block, neighbour, time_new)
+    while(Q):
+        popnode, popnodetime = Q.pop(0)
+        for neighbor in popnode.neighbours:
+            if(neighbor not in visited):
+                delay = prop_delay(popnode, neighbor, block)
+                time_new = popnodetime + delay
+                Q.push([neighbor, time_new])
+                visited.push(neighbor)
+                newledger = neighbor.ledger.copy()
+                for txn in block.data:
+                    if txn.sender is not None:
+                        newledger[txn.sender]-=txn.amount
+                        if(newledger[txn.sender]<0):
+                            return
+                    newledger[txn.receiver]+=txn.amount
+                neighbor.ledger = newledger
+                neighbor.update(block, time_new)
+
     return
