@@ -43,7 +43,7 @@ def gen_transaction(sender):
     Generates a transaction
     """
     receiver = np.random.choice(sender.neighbours)
-    amount = np.random.randint(1, sender.balance)//10
+    amount = np.random.randint(1, sender.ledger[sender.ID])//10
     txn = Transaction(sender.ID, receiver.ID, amount)
     sender.unused_txns.append(txn)
     sender.last_txn_time = txn.timestamp
@@ -55,7 +55,7 @@ def create_block(node):
     Creates a block
     """
     if len(node.unused_txns) == 0:
-        return
+        return []
     #Creating a block
     # print(node.Tk)
     node.Tk = np.random.exponential(node.Tk_mean)
@@ -84,16 +84,12 @@ def create_block(node):
     #Adding miner reward
     txn_miner = Transaction(None, node.ID, block.reward)
     block.data.append(txn_miner)
-    block.size += txn_miner.size
-    newledger[node.ID]+=block.reward
-    node.ledger = newledger
+    # block.size += txn_miner.size
+    # newledger[node.ID]+=block.reward
+    # node.ledger = newledger
     #Adding block to blockchain
-    node.update(block, block.timestamp)
+    # node.update(block, block.timestamp)
     #Removing transactions from unused_txns
     node.unused_txns = node.unused_txns[y:]
     #Broadcasting block
-    events = []
-    for neighbour in node.neighbours:
-        delay = prop_delay(node, neighbour, block)
-        time_new = time()+delay
     return broadcast_block(block, node, block.timestamp)

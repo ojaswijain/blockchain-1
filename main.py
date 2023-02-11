@@ -11,7 +11,7 @@ Main file to run the simulator
 from simulator import EventQueue
 from init import gen_nodes
 from graph import create_graph, isConnected
-from visualise import visualise_tree
+from visualise import visualise_chain
 from init import gen_transaction, create_block
 from time import time 
 import numpy as np
@@ -30,8 +30,9 @@ if __name__ == '__main__':
         nodelist = gen_nodes(n, z0, z1)
         create_graph(nodelist)
 
+    start = time()
     que = EventQueue()
-    while True:
+    while time() - start < 10:
         for node in nodelist:
             if (time() - node.last_txn_time) > np.random.exponential(node.tx_time):
                 events = gen_transaction(node)
@@ -43,13 +44,21 @@ if __name__ == '__main__':
                     que.push(event)
         if len(que) == 0:
             continue
-        event = que.pop()
-        if event.type == "txn":
-            new_event = broadcast_transaction(event.data, event.src, event.time)
-        else:
-            new_event = broadcast_block(event.data, event.src, event.time)
-        for e in new_event:
-            que.push(e)
+        events = []
+        while len(que) > 0 and que.queue[0].time < time():
+            events.append(que.pop())
+            # print(event.type)
+            
+        for event in events:
+            if event.type == "txn":
+                new_event = broadcast_transaction(event.data, event.src, event.time)
+            else:
+                new_event = broadcast_block(event.data, event.src, event.time)
+            for e in new_event:
+                que.push(e)
+
+    for node in nodelist:
+        visualise_chain(node)
 
     # p_list = []
     # for node in nodelist:

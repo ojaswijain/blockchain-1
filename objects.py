@@ -98,27 +98,25 @@ class Node:
     ID = unique ID of the node (int)
     speed = speed of the node (slow, fast) (enum)
     CPU = CPU of the node(low, high) (enum)
-    Balance = balance of the node (string)
     blockchain = blockchain of the node (list)
     neighbours = list of connected nodes (list)
     unused_txns = list of unused transactions (list)
     env = environment (simpy)
     """
     genesisBlock = Block([])
-    genesisBlock.blkid = sha256(str(0).encode('utf-8')).hexdigest()
+    genesisBlock.BlkId = "Genesis"
     chain = BlockChain(genesisBlock)
     init_time = time()
-    interArrival = 2
+    interArrival = 0.1
 
     def __init__(self, ID, speed, CPU):
         self.ID = ID
         self.sim_time = time()
         self.speed = speed
         self.CPU = CPU
-        self.balance = 1000
         self.neighbours = []
         self.env = env
-        self.tx_time = 1e-2
+        self.tx_time = 1e-3
         self.Tk_mean = None
         self.Tk = None
 
@@ -161,7 +159,7 @@ class Node:
                     self.ledger[txn.receiver]+=txn.amount
                     if txn in self.unused_txns: 
                         self.unused_txns.remove(txn)
-                visualise_chain(self)
+                # visualise_chain(self)
                 return True
             elif self.isFork(block):
                 parent = block.parent
@@ -197,7 +195,7 @@ class Node:
                 for txn in block.data:
                     if txn in self.unused_txns:
                         self.unused_txns.remove(txn)
-                visualise_chain(self)
+                # visualise_chain(self)
                 return True           
 
 env = None
