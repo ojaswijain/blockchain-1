@@ -25,11 +25,8 @@ def gen_nodes(number_of_nodes, z0, z1):
     type_enum = {0: "low", 1: "high"}
     for i in range(number_of_nodes):
         print("Node ", i ,speed_enum[speed[i]], type_enum[type[i]])
-        node_list.append(Node(i, speed_enum[speed[i]], type_enum[type[i]]))
-    for i in range(number_of_nodes):
-        for j in range(number_of_nodes):
-            idx = j
-            node_list[i].ledger[idx] = 1000
+        node_list.append(Node(i, speed_enum[speed[i]], type_enum[type[i]], number_of_nodes))
+    
     h = 1/((10*(1-z1)+z1)*number_of_nodes)
     for i in range(number_of_nodes):
         if node_list[i].CPU == "low":
@@ -60,7 +57,7 @@ def create_block(node):
     #Creating a block
     # print(node.Tk)
     node.Tk = np.random.exponential(node.Tk_mean)
-    newledger = node.ledger.copy()
+    newledger = node.last_ledger.copy()
     block = Block([])
     block.parent = node.last_block
     print("Block with ID: ", block.BlkID, " created by node: ", node.ID, node.speed)
@@ -87,7 +84,7 @@ def create_block(node):
     block.data.append(txn_miner)
     block.size += txn_miner.size
     newledger[node.ID]+=block.reward
-    node.ledger = newledger
+    node.last_ledger = newledger
     #Adding block to blockchain
     node.update(block, block.timestamp)
     #Removing transactions from unused_txns
