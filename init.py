@@ -12,23 +12,28 @@ from time import time
 import numpy as np
 from objects import Node, Block, Transaction
 from msg import broadcast_transaction, broadcast_block
-from graph import prop_delay
 
 def gen_nodes(number_of_nodes, z0, z1):
     """
     Generates a list of nodes
+    Solution to part 1 of the assignment
     """
     node_list = []
+    #Speed and type of nodes
     speed = np.random.choice([0,1], number_of_nodes, p=[z0, 1-z0])
     type = np.random.choice([0,1], number_of_nodes, p=[z1, 1-z1])
     speed_enum = {0: "slow", 1: "fast"}
     type_enum = {0: "low", 1: "high"}
     for i in range(number_of_nodes):
         node_list.append(Node(i, speed_enum[speed[i]], type_enum[type[i]]))
+
+    #Initialising the ledgers
     for i in range(number_of_nodes):
         for j in range(number_of_nodes):
             idx = j
             node_list[i].ledger[idx] = 1000
+
+    #PoW simulation
     h = 1/((10*(1-z1)+z1)*number_of_nodes)
     for i in range(number_of_nodes):
         if node_list[i].CPU == "low":
@@ -47,7 +52,6 @@ def gen_transaction(sender):
     txn = Transaction(sender.ID, receiver.ID, amount)
     sender.unused_txns.append(txn)
     sender.last_txn_time = txn.timestamp
-    # print("Transaction with TxID: ", txn.TxID, " created by node: ", sender.ID, "to node: ", receiver.ID, "at time: ", txn.timestamp)
     return broadcast_transaction(txn, sender, txn.timestamp)
 
 def create_block(node):
@@ -57,7 +61,6 @@ def create_block(node):
     if len(node.unused_txns) == 0:
         return []
     #Creating a block
-    # print(node.Tk)
     node.Tk = np.random.exponential(node.Tk_mean)
     newledger = node.ledger.copy()
     block = Block([])
@@ -84,12 +87,6 @@ def create_block(node):
     #Adding miner reward
     txn_miner = Transaction(None, node.ID, block.reward)
     block.data.append(txn_miner)
-    # block.size += txn_miner.size
-    # newledger[node.ID]+=block.reward
-    # node.ledger = newledger
-    #Adding block to blockchain
-    # node.update(block, block.timestamp)
-    #Removing transactions from unused_txns
     node.unused_txns = node.unused_txns[y:]
     #Broadcasting block
     return broadcast_block(block, node, block.timestamp)

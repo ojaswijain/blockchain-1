@@ -8,13 +8,13 @@ Building a discrete event simulator for a P2P cryptocurrency network
 Main file to run the simulator
 """
 
+import numpy as np
 from simulator import EventQueue
 from init import gen_nodes
 from graph import create_graph, isConnected
 from visualise import visualise_chain
 from init import gen_transaction, create_block
 from time import time 
-import numpy as np
 from msg import broadcast_transaction, broadcast_block
 
 n = 100
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     start = time()
     que = EventQueue()
-    while time() - start < 10:
+    while time() - start < 60:
         for node in nodelist:
             if (time() - node.last_txn_time) > np.random.exponential(node.tx_time):
                 events = gen_transaction(node)
@@ -47,7 +47,6 @@ if __name__ == '__main__':
         events = []
         while len(que) > 0 and que.queue[0].time < time():
             events.append(que.pop())
-            # print(event.type)
             
         for event in events:
             if event.type == "txn":
@@ -59,49 +58,3 @@ if __name__ == '__main__':
 
     for node in nodelist:
         visualise_chain(node)
-
-    # p_list = []
-    # for node in nodelist:
-    #     p = Process(target= run, args = [node])
-    #     p_list.append(p)
-    # for p in p_list:
-    #     p.start()
-    # p.join()
-
-
-    # for node in nodelist:
-    #     print(node.ID, len(node.neighbours))
-    # visualise_tree(nodelist)
-
-# if __name__ == '__main__':
-
-#     nodelist = gen_nodes(n, z0*0.01, z1*0.01)
-#     create_graph(nodelist)
-
-#     while not isConnected(nodelist):
-#         nodelist = gen_nodes(n, z0, z1)
-#         create_graph(nodelist)
-    
-#     sim_list = []
-#     env = simpy.Environment()
-
-#     for node in nodelist:
-#         node.env = env
-#         sim_list.append(Simulator(node))
-    
-#     for sim in sim_list:
-#         sim.simulate()
-
-#     env.run(until=10000)
-    # p_list = []
-    # for node in nodelist:
-    #     p = Process(target= run, args = [node])
-    #     p_list.append(p)
-    # for p in p_list:
-    #     p.start()
-    # p.join()
-
-
-    # for node in nodelist:
-    #     print(node.ID, len(node.neighbours))
-    # visualise_tree(nodelist)

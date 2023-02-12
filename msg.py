@@ -9,13 +9,12 @@ Handling transmission and reception of tranasctions
 """
 
 from graph import prop_delay
-from simulator import EventQueue, Event
-
-#TODO: Change DFS to BFS
+from simulator import Event
 
 def broadcast_transaction(txn, node, time):
     """
     Broadcasts a transaction from a node
+    Solution to part 6 of the assignment
     """
     events = []
     node.txn_queue[txn.TxID] = time
@@ -24,7 +23,6 @@ def broadcast_transaction(txn, node, time):
             neighbour.unused_txns.append(txn)
             time_new = time + prop_delay(node, neighbour, txn)
             neighbour.txn_queue[txn.TxID] = time_new
-            # broadcast_transaction(txn, neighbour, time)
             events.append(Event(time_new, neighbour, "txn", txn))
     return events
 
@@ -51,5 +49,4 @@ def broadcast_block(block, node, time):
                 delay = prop_delay(node, neighbour, block)
                 time_new = time + delay
                 events.append(Event(time_new, neighbour, "block", block))
-                    # broadcast_block(block, neighbour, time_new)
     return events

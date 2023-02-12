@@ -9,7 +9,6 @@ File to handle the initialization of the graph and latencies
 """
 
 import numpy as np
-from simulator import Event
 
 c_slow = 5e6
 c_fast = 1e8
@@ -18,6 +17,7 @@ def create_graph(node_list):
     """
     Creates a connected graph
     4-8 neighbours for each node
+    Solution to part 4 of the assignment
     """
 
     number_of_neighbours = {}
@@ -64,6 +64,7 @@ def create_graph(node_list):
 def isConnected(nodelist):
     """
     Checks if the graph is connected
+    Solution to part 4 of the assignment
     """
     #Check if the number of neighbours is correct
     for i in nodelist:
@@ -92,6 +93,7 @@ def isConnected(nodelist):
 def prop_delay(node1, node2, msg):
     """
     Returns the time to propagate a message from node1 to node2
+    Solution to part 5 of the assignment
     """
     if (node1.ID, node2.ID) in node1.latency.keys():
         (p, speed, d) = node1.latency[(node1.ID, node2.ID)]
