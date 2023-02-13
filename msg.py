@@ -42,7 +42,7 @@ def broadcast_block(block, node, time):
                         print("Error: Negative balance")
                         return []
                 newledger[txn.receiver]+=txn.amount
-            node.ledger = newledger
+            # node.ledger = newledger
             node.update(block, time)
             
             for neighbour in node.neighbours:

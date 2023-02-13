@@ -209,5 +209,8 @@ class Node:
                 self.last_block_time = time
                 for txn in block.data:
                     if txn in self.unused_txns:
+                        if txn.sender is not None:
+                            self.ledger[txn.sender]-=txn.amount
+                        self.ledger[txn.receiver]+=txn.amount
                         self.unused_txns.remove(txn)
                 return True           

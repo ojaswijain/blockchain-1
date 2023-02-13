@@ -47,6 +47,8 @@ def gen_transaction(sender):
     """
     Generates a transaction
     """
+    if sender.ledger[sender.ID] == 0:
+        return []
     receiver = np.random.choice(sender.neighbours)
     amount = np.random.randint(1, sender.ledger[sender.ID])//10
     txn = Transaction(sender.ID, receiver.ID, amount)

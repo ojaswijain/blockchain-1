@@ -17,13 +17,13 @@ from init import gen_transaction, create_block
 from time import time 
 from msg import broadcast_transaction, broadcast_block
 
-n = 100
-z0 = 20
-z1 = 50
+n = 20
+z0 = 0.2
+z1 = 0.5
 
 if __name__ == '__main__':
 
-    nodelist = gen_nodes(n, z0*0.01, z1*0.01)
+    nodelist = gen_nodes(n, z0, z1)
     create_graph(nodelist)
 
     while not isConnected(nodelist):
@@ -32,7 +32,7 @@ if __name__ == '__main__':
 
     start = time()
     que = EventQueue()
-    while time() - start < 60:
+    while time() - start < 20:
         for node in nodelist:
             if (time() - node.last_txn_time) > np.random.exponential(node.tx_time):
                 events = gen_transaction(node)
@@ -58,3 +58,8 @@ if __name__ == '__main__':
 
     for node in nodelist:
         visualise_chain(node)
+
+    for node in nodelist:
+        with open("ledgers/ledger_" + str(node.ID) + ".txt", "w") as f:
+            for i in range(n):
+                f.write(str(node.ledger[i]) + "\n")
