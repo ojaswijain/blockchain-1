@@ -1,4 +1,4 @@
-###BlockChain Simulator###
+**BlockChain Simulator**
 
 dependencies:
 - numpy
@@ -6,5 +6,5 @@ dependencies:
 - networkx
 - heapq
 
-To run the simulator, run the following command:\\
+To run the simulator, run the following command:\
 python main.py <number of nodes> <fraction of slow nodes> <fraction of low CPUs> <simulation time> 
