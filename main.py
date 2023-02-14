@@ -12,16 +12,25 @@ import numpy as np
 from simulator import EventQueue
 from init import gen_nodes
 from graph import create_graph, isConnected
-from visualise import visualise_chain
+from visualise import visualise_chain, visualise_tree
 from init import gen_transaction, create_block
 from time import time 
 from msg import broadcast_transaction, broadcast_block
-
-n = 20
-z0 = 0.2
-z1 = 0.5
+import argparse
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-n", "--number_of_nodes", type=int, default=100)
+    parser.add_argument("-z0", "--z0", type=float, default=0.2)
+    parser.add_argument("-z1", "--z1", type=float, default=0.5)
+    parser.add_argument("-t", "--time", type=int, default=180)
+
+    args = parser.parse_args()
+    n = args.number_of_nodes
+    z0 = args.z0
+    z1 = args.z1
+    t = args.time
 
     nodelist = gen_nodes(n, z0, z1)
     create_graph(nodelist)
@@ -30,9 +39,12 @@ if __name__ == '__main__':
         nodelist = gen_nodes(n, z0, z1)
         create_graph(nodelist)
 
+    visualise_tree(nodelist)
+    # exit(0)
+
     start = time()
     que = EventQueue()
-    while time() - start < 20:
+    while time() - start < t:
         for node in nodelist:
             if (time() - node.last_txn_time) > np.random.exponential(node.tx_time):
                 events = gen_transaction(node)
