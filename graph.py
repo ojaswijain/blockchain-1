@@ -97,7 +97,7 @@ def prop_delay(node1, node2, msg):
     """
     if (node1.ID, node2.ID) in node1.latency.keys():
         (p, speed, d) = node1.latency[(node1.ID, node2.ID)]
-        return p + (msg.size)/speed + d
+        return p + (msg.size)/speed + np.random.exponential(d)
     elif (node2.ID, node1.ID) in node1.latency.keys():
         (p, speed, d) = node1.latency[(node2.ID, node1.ID)]
         return p + (msg.size)/speed + np.random.exponential(d)
