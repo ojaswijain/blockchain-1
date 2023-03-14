@@ -13,7 +13,7 @@ import numpy as np
 from objects import Node, Block, Transaction
 from msg import broadcast_transaction, broadcast_block
 
-def gen_nodes(number_of_nodes, z0, z1):
+def gen_nodes(number_of_nodes, z0, z1, selfish = False, stubborn = False, power=0.1):
     """
     Generates a list of nodes
     Solution to part 1 of the assignment
@@ -26,6 +26,16 @@ def gen_nodes(number_of_nodes, z0, z1):
     type_enum = {0: "low", 1: "high"}
     for i in range(number_of_nodes):
         node_list.append(Node(i, speed_enum[speed[i]], type_enum[type[i]]))
+
+    if selfish:
+        node_list[0].speed = "fast"
+        node_list[0].CPU = "high"
+        node_list[0].selfish = True
+
+    if stubborn:
+        node_list[0].speed = "fast"
+        node_list[0].CPU = "high"
+        node_list[0].stubborn = True
 
     #Initialising the ledgers
     for i in range(number_of_nodes):
@@ -41,6 +51,8 @@ def gen_nodes(number_of_nodes, z0, z1):
         else:
             node_list[i].Tk_mean = node_list[i].interArrival/(h*10)
         node_list[i].Tk = np.random.exponential(node_list[i].Tk_mean)
+    node_list[0].Tk = node_list[0].Tk/(10*power)
+    node_list[0].Tk_mean = node_list[0].Tk_mean/(10*power)
     return node_list
     
 def gen_transaction(sender):
@@ -60,13 +72,13 @@ def create_block(node):
     """
     Creates a block
     """
+
     if len(node.unused_txns) == 0:
         return []
     #Creating a block
     node.Tk = np.random.exponential(node.Tk_mean)
     newledger = node.ledger.copy()
     block = Block([])
-    block.parent = node.last_block
     print("Block with ID: ", block.BlkID, " created by node: ", node.ID, node.speed)
     block.timestamp = time()
     block.parent = node.last_block
@@ -90,5 +102,19 @@ def create_block(node):
     txn_miner = Transaction(None, node.ID, block.reward)
     block.data.append(txn_miner)
     node.unused_txns = node.unused_txns[y:]
+
+    #Selfish Miners
+    if node.selfish == True or node.stubborn == True:
+        node.lead+=1
+        block.malice = True
+        print("Selfish miner: ", node.ID, " created block: ", block.BlkID)
+        #Set parent to last block in private chain
+        if len(node.pvtChain) > 0:
+            block.parent = node.pvtChain[-1]
+        #Do not broadcast, just append to private chain
+        node.pvtChain.append(block)
+        return []
+    
     #Broadcasting block
     return broadcast_block(block, node, block.timestamp)
+

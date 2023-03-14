@@ -32,7 +32,7 @@ def broadcast_block(block, node, time):
     """
     events = []
     if block.BlkID not in node.block_queue.keys():
-            print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
+            # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
             node.block_queue[block.BlkID]=time
             newledger = node.ledger.copy()
             for txn in block.data:
@@ -43,10 +43,75 @@ def broadcast_block(block, node, time):
                         return []
                 newledger[txn.receiver]+=txn.amount
             # node.ledger = newledger
-            node.update(block, time)
             
+            #selfish miner conditions
+            if (node.selfish == True or node.stubborn == True) and block.malice == False:
+                events = take_action(node, time)
+                node.update(block, time)
+                return events
+                
+            node.update(block, time)
+            #pushing the broadcast events
             for neighbour in node.neighbours:
                 delay = prop_delay(node, neighbour, block)
                 time_new = time + delay
                 events.append(Event(time_new, neighbour, "block", block))
     return events
+
+def take_action(node, time):
+    """
+    Actions taken by selfish miners
+    Action depends on the type of selfish miner, and the current lead
+    """
+    events = []
+    delta_time = 1e-1
+    if node.lead > 0:
+        node.lead -= 1
+    if node.selfish == True:
+        #If lead = 0
+        if node.lead == 0:
+            #If the node has a private chain, broadcast the block
+            if node.pvtChain != []:
+                block = node.pvtChain.pop()
+                for neighbour in node.neighbours:
+                    delay = prop_delay(node, neighbour, block)
+                    time_new = time + delay
+                    events.append(Event(time_new, neighbour, "block", block))
+                node.last_block = block
+                return events
+            #If the node does not have a private chain, return nothing
+            else:
+                return events
+        
+        #If lead = 1
+        elif node.lead == 1:
+            #Broadcast all blocks in the private chain
+            while node.pvtChain != []:
+                block = node.pvtChain.pop()
+                for neighbour in node.neighbours:
+                    delay = prop_delay(node, neighbour, block)
+                    time_new = time + delay
+                    events.append(Event(time_new, neighbour, "block", block))
+                    #Broadcast blocks with a slight delay to maintain the order in the chains
+                    time += delta_time
+            node.lead = 0
+
+        #If lead > 1
+        else:
+            #Broadcast one block from the private chain
+            block = node.pvtChain.pop()
+            for neighbour in node.neighbours:
+                delay = prop_delay(node, neighbour, block)
+                time_new = time + delay
+                events.append(Event(time_new, neighbour, "block", block))
+            return events
+
+    elif node.stubborn == True:
+        if node.pvtChain != []:
+                block = node.pvtChain.pop()
+                for neighbour in node.neighbours:
+                    delay = prop_delay(node, neighbour, block)
+                    time_new = time + delay
+                    events.append(Event(time_new, neighbour, "block", block))
+                node.last_block = block
+                return events      

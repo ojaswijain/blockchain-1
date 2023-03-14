@@ -1,0 +1,18 @@
+Changes in node class:
+    -add selfish attribute
+    -add stubborn attribute
+    -add private chain
+    -add lead
+
+Tasks to do in create_block: (done)
+    -increase lead
+    -expand private chain
+    -set block to be malicious (mainly for visualization)
+
+Tasks to do in broadcast_block:
+    -call take_action
+    -do not broadcast if block not malicious
+
+Tasks to do in take_action:
+    - Actions to take if block is selfish: Lead 1->0, 2->1, N->(N-1)
+    - Actions to take if block is stubborn

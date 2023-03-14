@@ -59,6 +59,7 @@ class Block:
         self.parent = None
         self.chain_length = 1
         self.x = 0
+        self.malice = False
 
 class BlockChain:
     """
@@ -140,13 +141,19 @@ class Node:
         self.ledger = {}
         self.latency = {}
 
+        #Additions for assignment 2: Malicious nodes
+        self.selfish = False
+        self.stubborn = False
+        self.lead = 0
+        self.pvtChain = []
+
     def isFork(self, block):
         """
         Checks if the block is a fork
         """
         if block.parent.BlkID == self.last_block.BlkID:
             return False
-        print("Fork detected")
+        # print("Fork detected")
         if block.chain_length > self.last_block.chain_length:
             return True
         return False
@@ -156,7 +163,7 @@ class Node:
         Updates the node with the new block
         """
         if self.LocalChain.add_block(block):
-            print("Block with ID: " + block.BlkID + " added to node " + str(self.ID))
+            # print("Block with ID: " + block.BlkID + " added to node " + str(self.ID))
             with open(f"log/log_node{self.ID}.txt", "a") as f:
                 """
                 Write to log file
@@ -168,7 +175,8 @@ class Node:
                 Update the node if the block is not a fork and the chain length is greater than the last block
                 """
                 self.last_block = block
-                self.last_block_time = time
+                if (self.selfish == False and self.stubborn == False) or self.lead==0:
+                    self.last_block_time = time
                 for txn in block.data:
                     if txn.sender is not None:
                         self.ledger[txn.sender]-=txn.amount
@@ -180,7 +188,8 @@ class Node:
                 parent = block.parent
                 old_last = self.last_block
                 common = None
-                
+                if parent is None:
+                    print("Old last is None")
                 while parent.BlkID != old_last.BlkID:
                     old_last = old_last.parent
                     parent = parent.parent
@@ -206,11 +215,15 @@ class Node:
                     parent = parent.parent
 
                 self.last_block = block
-                self.last_block_time = time
+                if (self.selfish == False and self.stubborn == False) or self.lead==0:
+                    self.last_block_time = time
                 for txn in block.data:
                     if txn in self.unused_txns:
                         if txn.sender is not None:
                             self.ledger[txn.sender]-=txn.amount
                         self.ledger[txn.receiver]+=txn.amount
                         self.unused_txns.remove(txn)
-                return True           
+                return True      
+
+        else:
+            print("Block with ID: " + block.BlkID + " not added to node " + str(self.ID))     
