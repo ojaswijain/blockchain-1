@@ -32,7 +32,9 @@ def visualise_chain(node):
         if i==0:
             G.add_node(chain[i].BlkID[:7], pos = (center,chain[-1].chain_length-chain[i].chain_length))
             x[chain[i].BlkID] = 0
-            if chain[i].malice == True:
+            if chain[i].pvt == True:
+                color_map.append('g')
+            elif chain[i].malice == True:
                 color_map.append('r')
             else:
                 color_map.append('c')
@@ -42,7 +44,9 @@ def visualise_chain(node):
             chain[i].x = chain[i].parent.x+0.2*x_coord/len(chain)
             x[chain[i].parent.BlkID] += 1
             x[chain[i].BlkID] = 0
-            if chain[i].malice == True:
+            if chain[i].pvt == True:
+                color_map.append('g')
+            elif chain[i].malice == True:
                 color_map.append('r')
             else:
                 color_map.append('c')

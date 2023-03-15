@@ -60,6 +60,7 @@ class Block:
 
         #ASS2
         self.malice = False
+        self.pvt = False
 
 class BlockChain:
     """
@@ -84,7 +85,7 @@ class BlockChain:
             if blk.parent.BlkID == block.BlkID:
                 check = True
         if check == False:
-            print("Parent not in chain")
+            print(f"Parent {blk.parent.BlkID} not in chain")
             return False
         
         # Check if parent is the last block    
@@ -118,7 +119,7 @@ class Node:
     genesisBlock.BlkID = "Genesis"
     chain = BlockChain(genesisBlock)
     init_time = time()
-    interArrival = 0.8
+    interArrival = 2
 
     def __init__(self, ID, speed, CPU):
         self.ID = ID

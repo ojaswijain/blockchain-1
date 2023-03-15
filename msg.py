@@ -73,6 +73,8 @@ def take_action(node, time):
             #If the node has a private chain, broadcast the block
             if node.pvtChain != []:
                 block = node.pvtChain.pop(0)
+                block.pvt = False
+                print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay
@@ -88,6 +90,8 @@ def take_action(node, time):
             #Broadcast all blocks in the private chain
             while node.pvtChain != []:
                 block = node.pvtChain.pop(0)
+                block.pvt = False
+                print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay
@@ -101,6 +105,8 @@ def take_action(node, time):
         else:
             #Broadcast one block from the private chain
             block = node.pvtChain.pop(0)
+            block.pvt = False
+            print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
             for neighbour in node.neighbours:
                 delay = prop_delay(node, neighbour, block)
                 time_new = time + delay
@@ -109,7 +115,8 @@ def take_action(node, time):
 
     elif node.stubborn == True:
         if node.pvtChain != []:
-                block = node.pvtChain.pop()
+                block = node.pvtChain.pop(0)
+                block.pvt = False
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay

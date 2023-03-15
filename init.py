@@ -104,6 +104,7 @@ def create_block(node):
     if node.selfish or node.stubborn:
         node.lead += 1
         block.malice = True
+        block.pvt = True
         print("Selfish miner: ", node.ID, " created block: ", block.BlkID)
         print("Lead: ", node.lead)
         if len(node.pvtChain) > 0:
