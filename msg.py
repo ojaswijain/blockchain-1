@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Feb  4 12:03:13 2023
-
 @author: ojaswi
-
 Building a discrete event simulator for a P2P cryptocurrency network
 Handling transmission and reception of tranasctions
 """
@@ -31,6 +29,14 @@ def broadcast_block(block, node, time):
     Broadcasts a block from a node
     """
     events = []
+
+    if node.selfish == True or node.stubborn == True:
+        if block.BlkID not in node.block_queue.keys():
+            node.block_queue[block.BlkID]=time
+            node.update(block, time)
+            if block.malice == False:
+                take_action(node, time)
+        return events
     if block.BlkID not in node.block_queue.keys():
             # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
             node.block_queue[block.BlkID]=time
@@ -43,15 +49,8 @@ def broadcast_block(block, node, time):
                         return []
                 newledger[txn.receiver]+=txn.amount
             # node.ledger = newledger
-            
-            #selfish miner conditions
-            if (node.selfish == True or node.stubborn == True) and block.malice == False:
-                events = take_action(node, time)
-                node.update(block, time)
-                return events
-                
             node.update(block, time)
-            #pushing the broadcast events
+            
             for neighbour in node.neighbours:
                 delay = prop_delay(node, neighbour, block)
                 time_new = time + delay
@@ -67,6 +66,7 @@ def take_action(node, time):
     delta_time = 1e-1
     if node.lead > 0:
         node.lead -= 1
+        print("New lead: ", node.lead)
     if node.selfish == True:
         #If lead = 0
         if node.lead == 0:
@@ -114,4 +114,4 @@ def take_action(node, time):
                     time_new = time + delay
                     events.append(Event(time_new, neighbour, "block", block))
                 node.last_block = block
-                return events      
+                return events   
