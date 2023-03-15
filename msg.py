@@ -35,7 +35,7 @@ def broadcast_block(block, node, time):
             node.block_queue[block.BlkID]=time
             node.update(block, time)
             if block.malice == False:
-                take_action(node, time)
+                events = take_action(node, time)
         return events
     if block.BlkID not in node.block_queue.keys():
             # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
@@ -72,7 +72,7 @@ def take_action(node, time):
         if node.lead == 0:
             #If the node has a private chain, broadcast the block
             if node.pvtChain != []:
-                block = node.pvtChain.pop()
+                block = node.pvtChain.pop(0)
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay
@@ -87,7 +87,7 @@ def take_action(node, time):
         elif node.lead == 1:
             #Broadcast all blocks in the private chain
             while node.pvtChain != []:
-                block = node.pvtChain.pop()
+                block = node.pvtChain.pop(0)
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay
@@ -95,11 +95,12 @@ def take_action(node, time):
                     #Broadcast blocks with a slight delay to maintain the order in the chains
                     time += delta_time
             node.lead = 0
+            return events
 
         #If lead > 1
         else:
             #Broadcast one block from the private chain
-            block = node.pvtChain.pop()
+            block = node.pvtChain.pop(0)
             for neighbour in node.neighbours:
                 delay = prop_delay(node, neighbour, block)
                 time_new = time + delay

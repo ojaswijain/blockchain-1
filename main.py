@@ -30,11 +30,11 @@ if __name__ == '__main__':
     z1 = args.z1
     t = args.time
 
-    nodelist = gen_nodes(n, z0, z1, selfish=True, power=1)
+    nodelist = gen_nodes(n, z0, z1, stubborn=True, power=1)
     create_graph(nodelist)
 
     while not isConnected(nodelist):
-        nodelist = gen_nodes(n, z0, z1, selfish=True, power=1)
+        nodelist = gen_nodes(n, z0, z1, stubborn=True, power=1)
         create_graph(nodelist)
 
     # visualise_tree(nodelist)
@@ -54,8 +54,10 @@ if __name__ == '__main__':
                     que.push(event)
         if len(que) == 0:
             continue
+        
         events = []
         new_event = []
+
         while len(que) > 0 and que.queue[0].time < time():
             events.append(que.pop())
             
