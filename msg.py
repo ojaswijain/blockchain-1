@@ -30,13 +30,17 @@ def broadcast_block(block, node, time):
     """
     events = []
 
+    #Adversary actions
     if node.selfish == True or node.stubborn == True:
+        #Adding block to own queue and chain
         if block.BlkID not in node.block_queue.keys():
             node.block_queue[block.BlkID]=time
             node.update(block, time)
+            #If block is not malicious, release new block to the network
             if block.malice == False:
                 events = take_action(node, time)
         return events
+
     if block.BlkID not in node.block_queue.keys():
             # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID, " at time: ", time)
             node.block_queue[block.BlkID]=time
@@ -97,7 +101,7 @@ def take_action(node, time):
                     time_new = time + delay
                     events.append(Event(time_new, neighbour, "block", block))
                     #Broadcast blocks with a slight delay to maintain the order in the chains
-                    time += delta_time
+                time += delta_time
             node.lead = 0
             return events
 
@@ -114,6 +118,7 @@ def take_action(node, time):
             return events
 
     elif node.stubborn == True:
+        #Release one block from the private chain
         if node.pvtChain != []:
                 block = node.pvtChain.pop(0)
                 block.pvt = False

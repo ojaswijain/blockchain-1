@@ -58,7 +58,7 @@ class Block:
         self.chain_length = 1
         self.x = 0
 
-        #ASS2
+        #Attributes for visualisation
         self.malice = False
         self.pvt = False
 
@@ -119,6 +119,7 @@ class Node:
     genesisBlock.BlkID = "Genesis"
     chain = BlockChain(genesisBlock)
     init_time = time()
+    #Need to tune interarrival times for the simulation
     interArrival = 2
 
     def __init__(self, ID, speed, CPU):
@@ -142,7 +143,7 @@ class Node:
         self.ledger = {}
         self.latency = {}
 
-        #ASS2
+        #Adversarial attributes
         self.selfish = False
         self.stubborn = False
         self.lead = 0
@@ -164,6 +165,7 @@ class Node:
         """
         Updates the node with the new block
         """
+        #Add the block to the local chain
         if self.LocalChain.add_block(block):
             # print("Block with ID: " + block.BlkID + " added to node " + str(self.ID))
             with open(f"log/log_node{self.ID}.txt", "a") as f:
@@ -172,11 +174,14 @@ class Node:
                 Solution to part 8 of the assignment
                 """
                 f.write("Block ID: " + block.BlkID[:5] + " at " + str(time)+"\n")
+
+            #Update the node if the block is not a fork and the chain length is greater than the last block
             if not self.isFork(block) and block.chain_length > self.last_block.chain_length:
                 """
                 Update the node if the block is not a fork and the chain length is greater than the last block
                 """
                 self.last_block = block
+                #Update last block time only if the node is not selfish or the block is malicious
                 if self.lead == 0 or block.malice == True:
                     self.last_block_time = time
                     self.Tk = np.random.exponential(self.Tk_mean)
@@ -187,11 +192,14 @@ class Node:
                     if txn in self.unused_txns: 
                         self.unused_txns.remove(txn)
                 return True
+            
+            #Update the node if the block is a fork
             elif self.isFork(block):
                 parent = block.parent
                 old_last = self.last_block
                 common = None
                 
+                #Find the common ancestor
                 while parent.BlkID != old_last.BlkID:
                     old_last = old_last.parent
                     parent = parent.parent
@@ -199,6 +207,7 @@ class Node:
                 parent = block.parent
                 old_last = self.last_block
                 
+                #Update the ledger for old chain
                 while old_last.BlkID != common.BlkID:
                     for txn in old_last.data:
                         self.unused_txns.append(txn)
@@ -207,6 +216,7 @@ class Node:
                         self.ledger[txn.receiver]-=txn.amount
                     old_last = old_last.parent
                 
+                #Update the ledger for new chain
                 while parent.BlkID != common.BlkID:
                     for txn in parent.data:
                         if txn in self.unused_txns:
@@ -217,9 +227,12 @@ class Node:
                     parent = parent.parent
 
                 self.last_block = block
+                #Update last block time only if the node is not selfish or the block is malicious
                 if self.lead == 0 or block.malice == True:
                     self.last_block_time = time
                     self.Tk = np.random.exponential(self.Tk_mean)
+                
+                #Update the ledger
                 for txn in block.data:
                     if txn in self.unused_txns:
                         if txn.sender is not None:
@@ -228,6 +241,7 @@ class Node:
                         self.unused_txns.remove(txn)
                 return True 
             
+        #If the block is not added to the local chain
         else:
             print("Block with ID: " + block.BlkID + " not added to node " + str(self.ID))
             return False

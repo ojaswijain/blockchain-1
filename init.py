@@ -33,6 +33,7 @@ def gen_nodes(number_of_nodes, z0, z1, power=1, selfish = False, stubborn = Fals
             idx = j
             node_list[i].ledger[idx] = 1000
 
+    #Node 0 is selfish or stubborn
     if selfish or stubborn:
         node_list[0].selfish = True
         node_list[0].CPU = "high"
@@ -47,8 +48,9 @@ def gen_nodes(number_of_nodes, z0, z1, power=1, selfish = False, stubborn = Fals
             node_list[i].Tk_mean = node_list[i].interArrival/(h*10)
         node_list[i].Tk = np.random.exponential(node_list[i].Tk_mean)
     
+    #If node 0 is selfish or stubborn
     if selfish or stubborn:
-    #     node_list[0].Tk = node_list[0].Tk/10**power
+        node_list[0].Tk = node_list[0].Tk/10**power
         node_list[0].Tk_mean = node_list[0].Tk_mean/10**power
 
     return node_list
@@ -102,12 +104,14 @@ def create_block(node):
     node.unused_txns = node.unused_txns[y:]
 
     if node.selfish or node.stubborn:
+        #Add node and block attributes
         node.lead += 1
         block.malice = True
         block.pvt = True
         print("Selfish miner: ", node.ID, " created block: ", block.BlkID)
         print("Lead: ", node.lead)
         if len(node.pvtChain) > 0:
+            #Add parent to block
             block.parent = node.pvtChain[-1]
         #Do not broadcast, just append to private chain
         node.pvtChain.append(block)

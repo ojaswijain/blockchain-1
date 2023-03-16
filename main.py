@@ -74,9 +74,6 @@ if __name__ == '__main__':
     print(len(nodelist[0].LocalChain.chain))
     print(len(nodelist[1].LocalChain.chain))
 
-    # print(len(nodelist[0].pvtChain))
-    # print(len(nodelist[1].pvtChain))
-
     for node in nodelist:
         visualise_chain(node)
 
