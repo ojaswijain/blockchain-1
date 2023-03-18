@@ -70,6 +70,7 @@ class BlockChain:
     
     def __init__(self, blk):
         self.chain=[blk]
+        self.orphans = []
 
     def add_block(self, blk):
 
@@ -86,6 +87,7 @@ class BlockChain:
                 check = True
         if check == False:
             print(f"Parent {blk.parent.BlkID} not in chain")
+            self.orphans.append(blk)
             return False
         
         # Check if parent is the last block    
@@ -120,7 +122,7 @@ class Node:
     chain = BlockChain(genesisBlock)
     init_time = time()
     #Need to tune interarrival times for the simulation
-    interArrival = 2
+    interArrival = 1
 
     def __init__(self, ID, speed, CPU):
         self.ID = ID
@@ -191,7 +193,6 @@ class Node:
                     self.ledger[txn.receiver]+=txn.amount
                     if txn in self.unused_txns: 
                         self.unused_txns.remove(txn)
-                return True
             
             #Update the node if the block is a fork
             elif self.isFork(block):
@@ -239,7 +240,13 @@ class Node:
                             self.ledger[txn.sender]-=txn.amount
                         self.ledger[txn.receiver]+=txn.amount
                         self.unused_txns.remove(txn)
-                return True 
+
+            #Look for orphans
+            for blk in self.LocalChain.orphans:
+                if blk.parent.BlkID == self.last_block.BlkID:
+                    print("Orphan with ID: " + blk.BlkID + " added to node " + str(self.ID))
+                    self.LocalChain.orphans.remove(blk)
+                    self.update(blk, time)
             
         #If the block is not added to the local chain
         else:
