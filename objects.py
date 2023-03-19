@@ -119,7 +119,7 @@ class Node:
     genesisBlock.BlkID = "Genesis"
     chain = BlockChain(genesisBlock)
     init_time = time()
-    interArrival = 2
+    interArrival = 10
 
     def __init__(self, ID, speed, CPU):
         self.ID = ID

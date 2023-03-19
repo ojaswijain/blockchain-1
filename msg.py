@@ -66,7 +66,7 @@ def take_action(node, time):
     delta_time = 1e-1
     if node.lead > 0:
         node.lead -= 1
-        print("New lead: ", node.lead)
+        # print("New lead: ", node.lead)
     if node.selfish == True:
         #If lead = 0
         if node.lead == 0:
@@ -74,7 +74,7 @@ def take_action(node, time):
             if node.pvtChain != []:
                 block = node.pvtChain.pop(0)
                 block.pvt = False
-                print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
+                # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay
@@ -91,7 +91,7 @@ def take_action(node, time):
             while node.pvtChain != []:
                 block = node.pvtChain.pop(0)
                 block.pvt = False
-                print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
+                # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
                 for neighbour in node.neighbours:
                     delay = prop_delay(node, neighbour, block)
                     time_new = time + delay
@@ -106,7 +106,7 @@ def take_action(node, time):
             #Broadcast one block from the private chain
             block = node.pvtChain.pop(0)
             block.pvt = False
-            print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
+            # print("Block: ", block.BlkID, " broadcasted by node: ", node.ID)
             for neighbour in node.neighbours:
                 delay = prop_delay(node, neighbour, block)
                 time_new = time + delay

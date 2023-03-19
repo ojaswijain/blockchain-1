@@ -77,7 +77,7 @@ def create_block(node):
     newledger = node.ledger.copy()
     block = Block([])
     block.parent = node.last_block
-    print("Block with ID: ", block.BlkID, " created by node: ", node.ID, node.speed)
+    # print("Block with ID: ", block.BlkID, " created by node: ", node.ID, node.speed)
     block.timestamp = time()
     block.parent = node.last_block
     node.last_block_time = block.timestamp
@@ -105,8 +105,8 @@ def create_block(node):
         node.lead += 1
         block.malice = True
         block.pvt = True
-        print("Selfish miner: ", node.ID, " created block: ", block.BlkID)
-        print("Lead: ", node.lead)
+        # print("Selfish miner: ", node.ID, " created block: ", block.BlkID)
+        # print("Lead: ", node.lead)
         if len(node.pvtChain) > 0:
             block.parent = node.pvtChain[-1]
         #Do not broadcast, just append to private chain

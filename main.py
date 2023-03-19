@@ -22,8 +22,8 @@ if __name__ == '__main__':
     parser.add_argument("-n", "--number_of_nodes", type=int, default=20)
     parser.add_argument("-z0", "--z0", type=float, default=0.2)
     parser.add_argument("-z1", "--z1", type=float, default=0.5)
-    parser.add_argument("-t", "--time", type=int, default=30)
-    parser.add_argument("-p", "--power", type=int, default=1)
+    parser.add_argument("-t", "--time", type=int, default=90)
+    parser.add_argument("-p", "--power", type=int, default=1.5)
 
     args = parser.parse_args()
     n = args.number_of_nodes
@@ -32,11 +32,11 @@ if __name__ == '__main__':
     t = args.time
     p = args.power
 
-    nodelist = gen_nodes(n, z0, z1, stubborn=True, power=p)
+    nodelist = gen_nodes(n, z0, z1, selfish=True, power=p)
     create_graph(nodelist)
 
     while not isConnected(nodelist):
-        nodelist = gen_nodes(n, z0, z1, stubborn=True, power=p)
+        nodelist = gen_nodes(n, z0, z1, selfish=True, power=p)
         create_graph(nodelist)
 
     # visualise_tree(nodelist)
@@ -71,11 +71,57 @@ if __name__ == '__main__':
             for e in new_event:
                 que.push(e)
 
-    print(len(nodelist[0].LocalChain.chain))
-    print(len(nodelist[1].LocalChain.chain))
+    # print(len(nodelist[0].LocalChain.chain))
+    # print(len(nodelist[1].LocalChain.chain))
 
-    # print(len(nodelist[0].pvtChain))
-    # print(len(nodelist[1].pvtChain))
+    chainhonest = nodelist[1].LocalChain.chain
+    chainad = nodelist[9].LocalChain.chain
+
+    maxlen = chainhonest[0].chain_length
+
+    for i in range(len(chainhonest)):
+        # if(chainhonest[i].BlkID == "Genesis"):
+        #     continue
+        # if(chainhonest[i].creator in blocksby.keys()):
+        #     blocksby[chain[i].creator]+=1
+        # else:
+        #     blocksby[chain[i].creator]=1
+        if(chainhonest[i].chain_length > maxlen):
+            maxlenat = i
+            maxlen = chainhonest[i].chain_length
+        elif(chainhonest[i].chain_length == maxlen and chainhonest[i].malice):
+            maxlenat = i
+
+    maliceinmain = 0
+    totalinmain = 1
+    block = chainhonest[maxlenat]
+    while(block.BlkID!="Genesis"):
+        totalinmain += 1
+        if(block.malice):
+            maliceinmain+=1
+        block = block.parent
+    
+    # for node in nodelist:
+    #     if(node.ID in blocksby.keys()):
+    #         print(node.ID, blocksby[node.ID])
+    #     else:
+    #         print(node.ID, 0)
+    # print(nodelist[0].forkcount)
+    # print(len(chain))
+    count = 0
+
+    for block in nodelist[0].LocalChain.chain:
+        if block.malice:
+            count+=1
+    
+    # print("malice count = ", count)
+    # print("total length = ", totalinmain)
+
+    # print("lead = ", len(nodelist[0].pvtChain))
+    # # print(len(nodelist[1].pvtChain))
+
+    print("MPUavg = ",maliceinmain/count)
+    print("MPUoverall = ", totalinmain/len(nodelist[0].LocalChain.chain))
 
     for node in nodelist:
         visualise_chain(node)
