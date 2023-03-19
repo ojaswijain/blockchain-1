@@ -23,7 +23,8 @@ if __name__ == '__main__':
     parser.add_argument("-z0", "--z0", type=float, default=0.2)
     parser.add_argument("-z1", "--z1", type=float, default=0.5)
     parser.add_argument("-t", "--time", type=int, default=30)
-    parser.add_argument("-p", "--power", type=int, default=1)
+    parser.add_argument("-p", "--power", type=float, default=1)
+    parser.add_argument("-z", "--zeta", type=float, default=0.75)
 
     args = parser.parse_args()
     n = args.number_of_nodes
@@ -31,16 +32,18 @@ if __name__ == '__main__':
     z1 = args.z1
     t = args.time
     p = args.power
+    zeta = args.zeta
 
     nodelist = gen_nodes(n, z0, z1, stubborn=True, power=p)
-    create_graph(nodelist)
+    create_graph(nodelist, zeta)
 
-    while not isConnected(nodelist):
+    while not isConnected(nodelist, zeta):
         nodelist = gen_nodes(n, z0, z1, stubborn=True, power=p)
-        create_graph(nodelist)
+        create_graph(nodelist, zeta)
 
     # visualise_tree(nodelist)
     # exit(0)
+    # print(len(nodelist[0].neighbours), zeta*n)
 
     start = time()
     que = EventQueue()

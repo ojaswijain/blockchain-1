@@ -13,7 +13,7 @@ import numpy as np
 c_slow = 5e6
 c_fast = 1e8
 
-def create_graph(node_list):
+def create_graph(node_list, zeta = 0):
     """
     Creates a connected graph
     4-8 neighbours for each node
@@ -28,6 +28,10 @@ def create_graph(node_list):
     #Generating random number of neighbours for each node
     for node in node_list:
         number_of_neighbours[node.ID] = np.random.randint(4, 8)
+
+    #Addition for assignment 2, number of neighbours of malicious node
+    if zeta > 0:
+        number_of_neighbours[0] = zeta*len(node_list)
     
     #Creating edges
     while len(nodes)>1:
@@ -56,20 +60,24 @@ def create_graph(node_list):
             if number_of_neighbours[n2.ID] == 0:
                 nodes.remove(n2)
 
-    print("Graph created")
+    # print("Graph created")
     for node in node_list:
         node.latency = latency
     return
 
-def isConnected(nodelist):
+def isConnected(nodelist, zeta):
     """
     Checks if the graph is connected
     Solution to part 4 of the assignment
     """
     #Check if the number of neighbours is correct
     for i in nodelist:
-        if len(i.neighbours) < 4 or len(i.neighbours) > 8:
+        #Adding the check for malicious node
+        if i.selfish and len(i.neighbours) < 0.9*zeta*len(nodelist):
             return False
+        elif (not i.selfish) and (len(i.neighbours) < 4 or len(i.neighbours) > 8):
+            return False
+        return True
 
     #Create a visited array and do BFS
     visited = [False] * len(nodelist)
