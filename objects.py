@@ -243,7 +243,7 @@ class Node:
 
             #Look for orphans
             for blk in self.LocalChain.orphans:
-                if blk.parent.BlkID == self.last_block.BlkID:
+                if blk.parent.BlkID == block.BlkID:
                     print("Orphan with ID: " + blk.BlkID + " added to node " + str(self.ID))
                     self.LocalChain.orphans.remove(blk)
                     self.update(blk, time)

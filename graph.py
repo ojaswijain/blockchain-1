@@ -31,12 +31,12 @@ def create_graph(node_list, zeta = 0):
 
     #Addition for assignment 2, number of neighbours of malicious node
     if zeta != 0:
-        nodes.remove(nodes[0])
         selfish_neighbours = np.random.choice(node_list, int(zeta*len(node_list)), replace=False)
         for node in selfish_neighbours:
             nodes[0].neighbours.append(node)
             node.neighbours.append(nodes[0])
             number_of_neighbours[node.ID] -= 1
+        nodes.remove(nodes[0])
     #Creating edges
     while len(nodes)>1:
         n1, n2 = np.random.choice(nodes, 2, replace=False)

@@ -22,9 +22,9 @@ if __name__ == '__main__':
     parser.add_argument("-n", "--number_of_nodes", type=int, default=100)
     parser.add_argument("-z0", "--z0", type=float, default=0.2)
     parser.add_argument("-z1", "--z1", type=float, default=0.5)
-    parser.add_argument("-t", "--time", type=int, default=30)
+    parser.add_argument("-t", "--time", type=int, default=60)
     parser.add_argument("-p", "--power", type=float, default=1.5)
-    parser.add_argument("-z", "--zeta", type=float, default=0.75)
+    parser.add_argument("-z", "--zeta", type=float, default=0.25)
 
     args = parser.parse_args()
     n = args.number_of_nodes

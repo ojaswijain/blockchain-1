@@ -78,7 +78,6 @@ def create_block(node):
     node.Tk = np.random.exponential(node.Tk_mean)
     newledger = node.ledger.copy()
     block = Block([])
-    block.parent = node.last_block
     print("Block with ID: ", block.BlkID, " created by node: ", node.ID, node.speed)
     block.timestamp = time()
     block.parent = node.last_block
